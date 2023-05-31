@@ -1,0 +1,212 @@
+/* TODO: fix alignment of text to page */
+
+/* Reset default browser styles */
+
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body styles */
+body {
+  font-family: Arial, sans-serif;
+  line-height: 1.5;
+  background-color: white;
+  color: #333;
+}
+
+/* Header styles */
+header {
+  text-align: center;
+  background-color: rgb(5,1,52);
+  color: #fff;
+  padding: .20in;
+}
+
+header h1 {
+  font-size: .375in;
+  margin-top: .25;
+  margin-bottom: .175in;
+}
+
+header p {
+  font-size: .20in;
+  margin-top: .25in;
+  margin-bottom: .10in;
+}
+
+/* Main content styles */
+.main-content {
+  padding-left: .4in;
+  padding-right: .4in;
+  padding-top: .5in;
+  padding-bottom: 0in;
+  text-align: center;
+  word-wrap: normal;
+}
+
+.main-content h2 {
+  padding-top: .175in;
+  padding-bottom: .1in;
+  font-size: .3in;
+}
+
+
+table {
+  width: 100%;
+  height: 100%;
+  border-collapse: collapse;
+  display: grid;
+
+  
+}
+
+table.customer-information {
+
+  height: .75in;
+}
+
+table.customer-information td {
+  font-size: 17px;
+}
+
+table.stone-pricing {
+  height: 6in;
+}
+
+table.edge-pricing {
+  height: 2in;
+}
+
+table.edge-pricing td {
+  font-size: 12px;
+}
+
+table.add-ons {
+  height: 5in;
+}
+
+
+
+
+th.absorbing-column {
+  width: 33%;
+}
+
+th.add-on-absorbing-column {
+  width: 75%;
+}
+
+th,
+td {
+  padding-top: .05in;
+  padding-bottom: .05in;
+  padding-left: .15in;
+  padding-right: .15in;
+  border: .025in solid #ccc;
+}
+
+
+
+
+
+
+
+th {
+  height: .5in;
+  background-color: rgb(5,1,52);
+  color: #fff;
+  font-size: .20in;
+}
+
+td {
+  height: fit-content;
+}
+
+/* Signature styles */
+.fingerprint {
+  height: .85in;
+  padding-top: .35in;
+  font-size: .1in;
+}
+
+.fingerprint p1{
+  font-size: .135in;
+}
+
+
+footer {
+  height: auto;
+  background-color: rgb(5,1,52);
+  color: #fff;
+  padding: .075in;
+  text-align: center;
+  font-size: .135in;
+}
+
+footer p {
+  margin-bottom: 10px;
+  
+}
+
+footer a {
+  color: #fff;
+  text-decoration: none;
+}
+
+
+.row {
+  width: 100%;
+  display: -webkit-box;
+  -webkit-box-pack: center; /* wkhtmltopdf uses this one */
+  justify-content: center;
+}
+.row > div {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+  flex: 1;
+}
+
+.row > div:last-child {
+  margin-right: 0;
+}
+.column {
+  flex: 50%;
+  padding: 5px;
+}
+
+
+.notes-section {
+  margin-top: .25in;
+}
+
+.notes-section nh {
+  font-size: .2in;
+}
+.order-process sh {
+  font-size: .2in;
+}
+.order-process sb {
+  font-size: .15in;
+}
+.order-process sn {
+  font-size: .1in;
+  font-weight: bold;
+}
+.signature {
+  text-align: left;
+  align-content: center;
+  word-wrap: normal;
+  width: 75%;
+  margin: 0 auto;
+  left: 12.5%;
+  border-bottom: 1px solid #000;
+  margin-bottom: .15in;
+
+}
+.signature sb {
+  display: block;
+  overflow: hidden;
+}

@@ -1,0 +1,109 @@
+{
+    "fabrication_cost": 17.0,
+    "mark_up": 0.7,
+    "stone_levels": {
+        "stone_level_0": {
+            "Name": "Granite Level 1",
+            "Color": [
+                "Azul Platino",
+                "SF Real",
+                "Caledonia",
+                "Luna Pearl"
+            ],
+            "Price": 7.5
+        },
+        "stone_level_1": {
+            "Name": "Granite Level 2",
+            "Color": [
+                "Fantasy Brown",
+                "Gray Mist",
+                "Santa Cecilia",
+                "New Venetian Gold"
+            ],
+            "Price": 10.0
+        },
+        "stone_level_2": {
+            "Name": "Granite Level 3",
+            "Color": [
+                "Nero Mist Honed",
+                "Salinas White",
+                "Steel Grey Polished",
+                "Steel Grey Brushed"
+            ],
+            "Price": 12.0
+        },
+        "stone_level_3": {
+            "Name": "Quartz Level 1",
+            "Color": [
+                "Frost White",
+                "Iced White",
+                "Peppercorn White"
+            ],
+            "Price": 17.0
+        },
+        "stone_level_4": {
+            "Name": "Quartz Level 2",
+            "Color": [
+                "Carrara Grigio",
+                "Carrara Mist",
+                "Fossil Gray"
+            ],
+            "Price": 22.5
+        },
+        "stone_level_5": {
+            "Name": "Quartz Level 3",
+            "Color": [
+                "Babylon Gray",
+                "Calacatta Classique",
+                "Calacatta Vicenza",
+                "Gray Lagoon"
+            ],
+            "Price": 25.5
+        },
+        "stone_level_6": {
+            "Name": "Quartz Level 4",
+            "Color": [
+                "Calacatta Miraggio",
+                "Calacatta Miraggio Cielo",
+                "Calacatta Miraggio Duo",
+                "Calacatta Miraggio Gold"
+            ],
+            "Price": 32.0
+        },
+        "stone_level_7": {
+            "Name": "rtert",
+            "Color": [
+                "rtdrt"
+            ],
+            "Price": 5.0
+        },
+        "stone_level_8": {
+            "Name": "drt",
+            "Color": [
+                "drt"
+            ],
+            "Price": 5.0
+        }
+    },
+    "edge_pricing": {
+        "roundover/bevel": 8.0,
+        "half_bullnose": 10.0,
+        "full_bullnose": 15.0,
+        "ogee": 30.0,
+        "mitered": 50.0
+    },
+    "add_ons": {
+        "trip_charge": 250.0,
+        "raw_cutout": 50.0,
+        "radii": 50.0,
+        "arcs": 100.0,
+        "splay": 100.0,
+        "waterfall": 650.0,
+        "farm_sink_cutout": 100.0,
+        "undermount_sink_install": 100.0,
+        "standard_18ga_sink": 110.0,
+        "upgrade_18ga_sink": 240.0,
+        "porcelain_vanity_sink": 45.0,
+        "customer_sink": 100.0
+    }
+}
