@@ -3,7 +3,8 @@
 As of 5-31-23 I still need to clean up the comments in the functions and create more legibility. 
 
 
-laminateQuotingSystem is a program using html, css, and python
+laminateQuotingSystem is a program using html, css, and python.
+
 Ironically this started for pricing laminate but it currently funcitons for quoting stone but will soon actually be converted for both.
 The quotes are made from a pdf created by a outsdie program called LT3Raptor which is a CAD drawing software that Fenco uses.
 

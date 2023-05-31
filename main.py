@@ -1,5 +1,5 @@
 # TODO:add option for job name, auto pull from pdf file but allow person to overwrite the job name
-
+# TODO: create a Focus out ont he entries that if left empty they revert to '0' (around line 365)
 
 
 
