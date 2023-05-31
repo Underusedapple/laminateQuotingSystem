@@ -83,12 +83,12 @@ The quote is also dynamic that adding more row will not run it off the edge of t
 
 # Imports
 
-    import bs4
-    import pdfkit
-    import os
-    import PyPDF2
-    import json
-    import tkinter
-    import re
-    import math
-    import bcrypt
+    pip install bs4
+    pip install pdfkit
+    pip install os
+    pip install PyPDF2
+    pip install json
+    pip install tkinter
+    pip install re
+    pip install math
+    pip install bcrypt
