@@ -73,7 +73,7 @@ table.customer-information td {
 }
 
 table.stone-pricing {
-  height: 6in;
+  height: 5.5in;
 }
 
 table.edge-pricing {
@@ -132,8 +132,9 @@ td {
   font-size: .1in;
 }
 
-.fingerprint p1{
+.fingerprint p1 {
   font-size: .135in;
+  font-style: bold;
 }
 
 
@@ -191,10 +192,7 @@ footer a {
 .order-process sb {
   font-size: .15in;
 }
-.order-process sn {
-  font-size: .1in;
-  font-weight: bold;
-}
+
 .signature {
   text-align: left;
   align-content: center;

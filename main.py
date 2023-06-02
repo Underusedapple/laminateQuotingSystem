@@ -149,7 +149,7 @@ class QuoteForm:
 
         # create pricing for edging
         upgrade_edge_pricing = {
-            edge.replace('/', ' ').replace('_',' ').title(): #edge name revised for legibility and formating
+            edge.replace('/', ' or ').replace('_',' ').title(): #edge name revised for legibility and formating
             math.ceil(edge_pricing[edge] * self.jobData["Finished Lnft"]) 
                 for edge in edge_pricing
         }
