@@ -69,20 +69,6 @@
                 "Calacatta Miraggio Gold"
             ],
             "Price": 32.0
-        },
-        "stone_level_7": {
-            "Name": "rtert",
-            "Color": [
-                "rtdrt"
-            ],
-            "Price": 5.0
-        },
-        "stone_level_8": {
-            "Name": "drt",
-            "Color": [
-                "drt"
-            ],
-            "Price": 5.0
         }
     },
     "edge_pricing": {

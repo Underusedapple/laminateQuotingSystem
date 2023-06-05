@@ -348,7 +348,7 @@ class QuoteForm:
         advanced_btn = tk.Button(
             master=self.button_frm,
             text="Advanced",
-            command=self.advanced_button,
+            command=self.advanced_button_cmd,
             width=15,
         )
         advanced_btn.grid(column=2, row=0, padx=5, sticky="w")
@@ -368,15 +368,7 @@ class QuoteForm:
         self.print_quote()
 
 
-    def advanced_button(self):
-        """Opens window for advanced options""" 
-        self.advanced_window = tk.Toplevel()
-        edit_price_btn = tk.Button(
-            self.advanced_window, text="Edit Pricing", command=self.open_info_edit
-        ).pack()
-        chnge_pssword_btn = tk.Button(
-            self.advanced_window, text="Change Password", command=self.change_password
-        ).pack()
+
 
     def check_password(self, entered_password_bytes):
         """Checks entered password with json file"""
@@ -389,8 +381,42 @@ class QuoteForm:
 
         # make entered password into bytes
         return bcrypt.checkpw(entered_password_bytes, pswrd)
+    
+    def advanced_button_cmd(self):
+        """Opens window for advanced options""" 
 
-    def change_password(self):
+
+
+        #password check
+        passwordbytes = bytes()
+        salt = bcrypt.gensalt()
+
+        while not self.check_password(passwordbytes):
+
+            password = tk.simpledialog.askstring("", "Enter password:", show="*",)
+            passwordbytes = password.encode("utf-8")
+
+            if password == None:
+                break
+            elif not self.check_password(passwordbytes):
+                messagebox.showerror("Incorrect Password", "Please enter your password")
+
+
+
+
+
+        self.advanced_window = tk.Toplevel()
+        self.advanced_window.rowconfigure(0,weight=1,pad=10)
+        self.advanced_window.rowconfigure(1,weight=1,pad=10)
+        self.advanced_window.columnconfigure(0,weight=1,pad=10)
+        edit_price_btn = tk.Button(
+            self.advanced_window, text="Edit Pricing", command=self.open_info_edit
+        ).grid(column=0,row=0, sticky='nsew', padx=5, pady=3)
+        chnge_pssword_btn = tk.Button(
+            self.advanced_window, text="Change Password", command=self.change_password_cmd
+        ).grid(column=0,row=1, sticky='nsew', padx=5, pady=3)
+
+    def change_password_cmd(self):
         """Opens frame to update password and save"""
         self.edit_pswrd_frame = tk.Toplevel()
         old_password_lbl = tk.Label(
@@ -486,53 +512,51 @@ class QuoteForm:
     def open_info_edit(self):
         """Opens window to buttons that updates pricing structure """
         self.import_pricing_data()
-        passwordbytes = bytes()
-        salt = bcrypt.gensalt()
 
-        while not self.check_password(passwordbytes):
-
-            password = tk.simpledialog.askstring("", "Enter password:", show="*",)
-            passwordbytes = password.encode("utf-8")
-
-            if password == None:
-                break
-            elif not self.check_password(passwordbytes):
-                messagebox.showerror("Incorrect Password", "Please enter your password")
         self.advanced_window.destroy()
         # window no frame
         self.edit_info_btn_page = tk.Toplevel()
         for z, data in enumerate(self.pricing_data):
-            self.edit_info_btn_page.rowconfigure(z, weight=1)
+            self.edit_info_btn_page.rowconfigure(z, weight=1,pad=10)
         self.edit_info_btn_page.columnconfigure(0, weight=1)
 
         # lsit of buttons for later?
         btns = []
+
+
+
+        button_organizer = [
+                Fab_Cost_Mark_Up_button,
+                Fab_Cost_Mark_Up_button,
+                Stone_Level_Button,
+                Edge_and_Add_On_Button,
+                Edge_and_Add_On_Button
+            ]
         # make and add buttons to list
         for z, data in enumerate(self.pricing_data):
 
-            button_organizer = [
-                Fab_Cost_Mark_Up_button(
-                    self.edit_info_btn_page, self.pricing_data, self, data
-                ),
-                Fab_Cost_Mark_Up_button(
-                    self.edit_info_btn_page, self.pricing_data, self, data
-                ),
-                Stone_Level_Button(
-                    self.edit_info_btn_page, self.pricing_data, self, data
-                ),
-                Edge_and_Add_On_Button(
-                    self.edit_info_btn_page, self.pricing_data, self, data
-                ),
-                Edge_and_Add_On_Button(
-                    self.edit_info_btn_page, self.pricing_data, self, data
-                )
-            ]
+            crnt_btn = button_organizer[z]
 
-            btns.append(button_organizer[z])
+            btns.append(crnt_btn(
+                    self.edit_info_btn_page, self.pricing_data, self, data
+                ))
 
         # pack buttons onto window
+
+
+        half_point = math.ceil(len(btns)/2)
+        rw = 0
+        col = 0
+
         for n, btn in enumerate(btns):
-            btn.grid(row=n, column=0, sticky="news")
+            if n >= half_point:
+                col = 1
+                rw = n - half_point
+            else:
+                rw = n
+            
+            
+            btn.grid(row=rw, column=col, sticky ='nsew',padx = 5, pady = 1.5,)
 
 
 

@@ -225,17 +225,17 @@ class Edge_and_Add_On_Button(tk.Button):
         self.submit_button = tk.Button(
             self.edit_page_frame, command=self.submit_cmd, text="Submit"
         )
-        self.submit_button.grid(row=x + 1, column=0)
+        self.submit_button.grid(row=x + 2, column=0)
 
         self.new_row_button = tk.Button(
             self.edit_page_frame, command=self.add_new_level, text="Add New Row"
         )
-        self.new_row_button.grid(row=x + 1, column=1)
+        self.new_row_button.grid(row=x + 1, column=0)
 
         self.delete_row_button = tk.Button(
             self.edit_page_frame, command=self.delete_level, text="Delete Bottom Row"
         )
-        self.delete_row_button.grid(row=x + 2, column=0)
+        self.delete_row_button.grid(row=x + 1, column=1)
 
         self.edit_page_frame.mainloop()
 
