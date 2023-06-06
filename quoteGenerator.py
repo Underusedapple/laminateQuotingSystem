@@ -195,6 +195,9 @@ class QuoteGenerator:
         sqft = self.jobData["Total Area"]
         if self.material == 'SelfEdge':
             pricing_levels = self.lam_quote(sqft,multiplier)
+            print(self.jobData["Finished Lnft"])
+            self.jobData["Finished Lnft"] = math.ceil(self.jobData["Finished Lnft"]*1.333 /12) *12
+            print(self.jobData["Finished Lnft"])
         if self.material == 'Stone':
             pricing_levels = self.stone_quote(sqft,multiplier)
 
@@ -202,12 +205,16 @@ class QuoteGenerator:
 
         # create pricing for edging
         upgrade_edge_pricing = {
-            edge.replace('/', ' or ').replace('_',' ').title(): #edge name revised for legibility and formating
-            math.ceil(edge_pricing[edge] * self.jobData["Finished Lnft"]) 
+            edge.replace('/', ' or ').replace('_',' ').title()#edge name revised for legibility and formating
+                :math.ceil(edge_pricing[edge] * self.jobData["Finished Lnft"]) 
                 for edge in edge_pricing
         }
 
-        createQuoteFromData(self.jobData,pricing_levels,upgrade_edge_pricing,self.folderpath,self.filepath,self.add_on_quants)
+        if self.material == 'SelfEdge':
+            for edge in upgrade_edge_pricing:
+                upgrade_edge_pricing[edge] = math.ceil(upgrade_edge_pricing[edge] * multiplier)
+
+        createQuoteFromData(self.jobData,pricing_levels,upgrade_edge_pricing,self.folderpath,self.filepath,self.add_on_quants,self.material)
 
     def validate_ent(self, input, char):
         """Checks for numerical inputs only"""

@@ -6,7 +6,7 @@ import os
 from PyPDF2 import PdfMerger
 from datetime import date
 
-def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, add_on_dict):
+def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, add_on_dict,material):
     # Read the HTML file
 
     if jobData['Customer Name']:
@@ -63,7 +63,7 @@ def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, 
 
 
     # Populate granite tiers
-    granite_tiers = soup.find(id='stone-tiers')
+    pricing_tiers = soup.find(id='stone-tiers')
     for tier in stone_dict:
 
 
@@ -94,7 +94,7 @@ def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, 
 
 
         row.append(est_sqft)
-        granite_tiers.append(row)
+        pricing_tiers.append(row)
 
 
     # Populate edge options
@@ -134,12 +134,53 @@ def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, 
         edge_options.append(row)
 
 
+    prices_include_text = """**Prices Include:"""
+    prices_exclude_text = """**Prices Exclude:"""
 
 
 
+    if material == 'Stone':
+        included_text = """Templating, Fabrication, Eased Edges, Standard Finish, and Regular Installation"""
+        excluded_text = """Removal of Existing Tops, Brackets, Supports, Carpentry Work, Appliance Placement,
+                                    Plumbing & Electrical Hookup, or Equipment & Operator To Lift Countertops for Upper Level Installations.
+                                    Customer Must Advise if Area of Installation Requires Access via Stairs / Steps. Fenco's Competitive
+                                    Prices Are Acheived Through a Balance of Layout Design and Maximizing Material Yields. Customer Specified Seam Locations,
+                                    Layout Design, and/or Special Slab Selections May Impact Material Yields and Increase Costs Resulting in Additional Charges.
+                                    Prices good for 60days beyond issue date."""    
+        
+    elif material == 'SelfEdge':
+        included_text = """3/4 Particleboard Construction. Warehouse delivery available based on job and location."""
+        excluded_text = """Site delivery, Distribution, Installation, Measuring, or Installation (unless otherwise noted below)"""  
+        
+
+
+    fingerprint = soup.find(id='fingerprint')
+    
+    fingerprint_part_p1 = soup.new_tag('p1')
+    fingerprint_bold_1 = soup.new_tag('b')
+    fingerprint_nonbold_1 = soup.new_tag('nb')
+    fingerprint_bold_2 = soup.new_tag('b')
+    fingerprint_nonbold_2 = soup.new_tag('nb')
+
+
+    fingerprint_bold_1.string = prices_include_text
+    fingerprint_nonbold_1.string = included_text
+    fingerprint_bold_2.string = prices_exclude_text
+    fingerprint_nonbold_2.string = excluded_text
+
+
+    fingerprint_part_p1.append(fingerprint_bold_1)
+    fingerprint_part_p1.append(fingerprint_nonbold_1)
+    fingerprint_part_p1.append(soup.new_tag('br')) #break
+    fingerprint_part_p1.append(fingerprint_bold_2)
+    fingerprint_part_p1.append(fingerprint_nonbold_2)
+
+
+    fingerprint.append(fingerprint_part_p1)
 
 
 
+    
 
 
 
@@ -271,6 +312,9 @@ def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, 
     
 
     os.startfile(new_file_path)
+
+
+
 
     
 
