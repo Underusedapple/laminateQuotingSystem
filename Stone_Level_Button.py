@@ -27,6 +27,7 @@ class Stone_Level_Button(tk.Button):
 
     def submit_cmd(self):
         # command for the submitbutton
+        quote_type = self.main.material
 
         new_data = {}  # data stored in dictionary
 
@@ -45,22 +46,26 @@ class Stone_Level_Button(tk.Button):
             level_price = float(self.stone_level_price_box[x][0].get("1.0", tk.END))
 
             # store that data using the iterator to name them individually
-            new_data[f"stone_level_{x}"] = {
+            new_data[f"{quote_type}_{x}"] = {
                 "Name": level_name,
                 "Color": level_colors,
                 "Price": level_price,
             }
 
         # update pricing data
-        self.pricing_data["stone_levels"] = new_data
+        if self.main.material == 'Stone':
+            levels = 'stone_levels'
+        elif self.main.material == 'SelfEdge':
+            levels = 'lam_levels'
+        self.pricing_data[levels] = new_data
 
         # update json (i currently have it rewriting all data just for simplicity, could only update the pricing data for effeciency)
         dumped_new_data = json.dumps(self.pricing_data, indent=4)
-        with open(r"jsons\pricing_data.json", "w") as pricing_data_json:
+        with open(self.main.data_json, "w") as pricing_data_json:
             pricing_data_json.write(dumped_new_data)
 
         # this is a verification that the password saved correctly
-        with open(r"jsons\pricing_data.json", "r") as pricing_data_json:
+        with open(self.main.data_json, "r") as pricing_data_json:
             pricing_data = json.load(pricing_data_json)
 
         if pricing_data[self.json_locator] == new_data:
@@ -247,7 +252,7 @@ class Multi_data_textbox(tk.Text):
 
 if __name__ == "__main__":
     # # load data from json file
-    with open(r"jsons\pricing_data.json", "r") as pricing_data_json:
+    with open(r"jsons\stone_pricing_data.json", "r") as pricing_data_json:
         pricing_data = json.load(pricing_data_json)
 
     # window no frame

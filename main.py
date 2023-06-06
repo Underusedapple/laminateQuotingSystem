@@ -1,4 +1,5 @@
 import tkinter as tk
+from QuoteGenerator import QuoteGenerator
 
 class MainWindow:
     def __init__(self):
@@ -16,16 +17,16 @@ class MainWindow:
 
 
     def stocked_self_edge_quote(self):
-        # Function for Stocked Self-Edge Quote button
-        pass  # Add your code here
+        stone_quote = tk.Tk() 
+        QuoteGenerator(stone_quote,'SelfEdge')
 
     def stocked_stone_quote(self):
-        # Function for Stocked Stone Quote button
-        pass  # Add your code here
+        lam_quote = tk.Tk()
+        QuoteGenerator(lam_quote,'Stone')
 
     def run(self):
         self.root.mainloop()
 
-# Create an instance of the MainWindow class
-window = MainWindow()
-window.run()
+if __name__ == '__main__':
+    window = MainWindow()
+    window.run()

@@ -17,11 +17,14 @@ from EdgesAndAddOnButton import Edge_and_Add_On_Button
 from ExtractDataFromPdf import extractDataFromPdf
 from createQuoteFromData import createQuoteFromData
 
-my_window = tk.Tk()
 
 
-class QuoteForm:
-    def __init__(self, master):
+class QuoteGenerator:
+    def __init__(self, master, material):
+        """Application used for quoting stocked materials from drawings """
+        
+        
+        self.material = material
 
         
 
@@ -88,31 +91,57 @@ class QuoteForm:
 
 
 
-        my_window.mainloop()
 
 
     def import_pricing_data(self):
-        """This imports the pricing structures saved under 'pricing_data.json' and saves them as 'self.pricing_data' """
-        with open(r"jsons\pricing_data.json", "r") as pricing_data_json:
+        if self.material == 'SelfEdge':
+            self.data_json = r"jsons\lam_pricing_data.json"
+        elif self.material == 'Stone':
+            self.data_json = r"jsons\stone_pricing_data.json"
+        """This imports the pricing structures saved under 'data_json' and saves them as 'self.pricing_data' """
+        with open(self.data_json, "r") as pricing_data_json:
             self.pricing_data = json.load(pricing_data_json)
 
-
-    def print_quote(self):
-        """Updates and then creates a PDF from a premade excel form used as a template"""
+    def lam_quote(self,sqft,multiplier):
         
-        if not self.multiplier_ent.get():
-            return
-        # get entered multiplier
-        multiplier = float(self.multiplier_ent.get())
 
-        # load pricing data for quote
-        self.import_pricing_data()
 
+        # info for pricing structures on stones
+
+        lam_levels = self.pricing_data["lam_levels"]
+
+        # pricing on add-ons
+        add_ons = self.pricing_data["add_ons"]
+
+
+        
+
+        #lambda for getting final price of laminate by multiplying level price by sqft, adding in add-ons
+        #multiplying by 2 and then multiply by customer multiplier
+        get_final_stone_price = lambda material_sqft_cost: math.ceil(
+                (((material_sqft_cost * sqft) + sum(add_on_price.values())) * 2) * multiplier)
+        
+
+        # takes the entries for the quantities of add-ons and multiplies it by the preset values to get costs of add-ons
+        add_on_price = {key: add_ons[key] * self.add_on_quants[key] for key in add_ons}
+
+        #change dictionary of levels to also have a price?
+
+        for stone_level in lam_levels:
+            sqft_cost = lam_levels[stone_level]['Price'] #prettify the get final price
+
+            lam_levels[stone_level]['Price'] = get_final_stone_price(sqft_cost)
+
+
+
+        # TODO: add in check for prices under $250
+        return lam_levels
+    def stone_quote(self,sqft,multiplier):
+    
         # pre-set values
         fabrication_cost = self.pricing_data["fabrication_cost"]
         mark_up = self.pricing_data["mark_up"]
 
-        edge_pricing = self.pricing_data["edge_pricing"]
 
         # info for pricing structures on stones
 
@@ -121,16 +150,14 @@ class QuoteForm:
         # pricing on add-ons
         add_ons = self.pricing_data["add_ons"]
 
-        # get the sqft from the pdf data
 
-        sqft = self.jobData["Total Area"]
         
         # lambda for getting our list price of stone without add-ons
         get_stone_cost = lambda material_sqft_cost: math.ceil(
             (sqft * fabrication_cost) + (((sqft * 1.25) * material_sqft_cost) / mark_up)
         )
         #lambda for getting final price of stone by getting stone cost, adding in add-ons
-        #multiplying by 2 and multiplier by customer multiplier
+        #multiplying by 2 and then multiply by customer multiplier
         get_final_stone_price = lambda material_sqft_cost: math.ceil(
                 ((get_stone_cost(material_sqft_cost) + sum(add_on_price.values())) * 2) * multiplier)
         
@@ -144,6 +171,32 @@ class QuoteForm:
             sqft_cost = stone_levels[stone_level]['Price'] #prettify the get final price
 
             stone_levels[stone_level]['Price'] = get_final_stone_price(sqft_cost)
+        return stone_levels
+
+
+
+    def print_quote(self):
+        """Updates and then creates a PDF from a premade excel form used as a template"""
+        
+        if not self.multiplier_ent.get():
+            return
+        # get entered multiplier
+        multiplier = float(self.multiplier_ent.get())
+
+        # load pricing data for quote
+        self.import_pricing_data()
+
+        #load edging
+        edge_pricing = self.pricing_data["edge_pricing"]
+
+
+        # get the sqft from the pdf data
+
+        sqft = self.jobData["Total Area"]
+        if self.material == 'SelfEdge':
+            pricing_levels = self.lam_quote(sqft,multiplier)
+        if self.material == 'Stone':
+            pricing_levels = self.stone_quote(sqft,multiplier)
 
 
 
@@ -154,7 +207,7 @@ class QuoteForm:
                 for edge in edge_pricing
         }
 
-        createQuoteFromData(self.jobData,stone_levels,upgrade_edge_pricing,self.folderpath,self.filepath,self.add_on_quants)
+        createQuoteFromData(self.jobData,pricing_levels,upgrade_edge_pricing,self.folderpath,self.filepath,self.add_on_quants)
 
     def validate_ent(self, input, char):
         """Checks for numerical inputs only"""
@@ -342,7 +395,7 @@ class QuoteForm:
         )
         submit_btn.grid(column=0, row=0, padx=5, sticky="e")
         clear_btn = tk.Button(
-            master=self.button_frm, text="Clear", command=self.clear_button, width=15
+            master=self.button_frm, text="Clear", command=self.clear_button_cmd, width=15
         )
         clear_btn.grid(column=1, row=0, padx=5)
         advanced_btn = tk.Button(
@@ -353,7 +406,7 @@ class QuoteForm:
         )
         advanced_btn.grid(column=2, row=0, padx=5, sticky="w")
 
-    def clear_button(self):
+    def clear_button_cmd(self):
         """This clears all entries on click"""
         for entry in self.entries:
             entry.delete(0, tk.END)
@@ -393,7 +446,8 @@ class QuoteForm:
 
         while not self.check_password(passwordbytes):
 
-            password = tk.simpledialog.askstring("", "Enter password:", show="*",)
+            password = tk.simpledialog.askstring("", "Enter password:", show="*")
+            
             passwordbytes = password.encode("utf-8")
 
             if password == None:
@@ -519,19 +573,27 @@ class QuoteForm:
         for z, data in enumerate(self.pricing_data):
             self.edit_info_btn_page.rowconfigure(z, weight=1,pad=10)
         self.edit_info_btn_page.columnconfigure(0, weight=1)
+        self.edit_info_btn_page.columnconfigure(1, weight=1)
+
 
         # lsit of buttons for later?
         btns = []
 
+        if self.material == 'SelfEdge':
+            button_organizer = [
+                    Stone_Level_Button,
+                    Edge_and_Add_On_Button,
+                    Edge_and_Add_On_Button
+                ]
+        elif self.material == 'Stone':
 
-
-        button_organizer = [
-                Fab_Cost_Mark_Up_button,
-                Fab_Cost_Mark_Up_button,
-                Stone_Level_Button,
-                Edge_and_Add_On_Button,
-                Edge_and_Add_On_Button
-            ]
+            button_organizer = [
+                    Fab_Cost_Mark_Up_button,
+                    Fab_Cost_Mark_Up_button,
+                    Stone_Level_Button,
+                    Edge_and_Add_On_Button,
+                    Edge_and_Add_On_Button
+                ]
         # make and add buttons to list
         for z, data in enumerate(self.pricing_data):
 
@@ -561,4 +623,6 @@ class QuoteForm:
 
 
 if __name__ == '__main__':
-    new_quote = QuoteForm(my_window)
+    my_window = tk.Tk()
+
+    new_quote = QuoteGenerator(my_window,'Stone')
