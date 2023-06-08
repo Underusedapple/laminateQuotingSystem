@@ -54,7 +54,7 @@ def extractDataFromPdf(file_path: str) -> dict :
                 elif "Finished" in line and re.search(r'\b\d+(?:\.\d+)?\b', line):
                         finished_lnft = re.search(r'\b\d+(?:\.\d+)?\b', line)
                         finished_lnft = float(finished_lnft[0])
-                        final_finished_lnft =+ finished_lnft
+                        final_finished_lnft += finished_lnft
                 elif "Flat Finish" in line and re.search(r'\b\d+(?:\.\d+)?\b', line):
                         flat_finished_lnft = re.search(r'\b\d+(?:\.\d+)?\b', line)
                         flat_finished_lnft = float(flat_finished_lnft[0])
