@@ -3,6 +3,7 @@
 from bs4 import BeautifulSoup
 import pdfkit
 import os
+import math
 from PyPDF2 import PdfMerger
 from datetime import date
 
@@ -56,7 +57,7 @@ def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, 
 
     infoRow.append(job_name)
     est_sqft = soup.new_tag('td')
-    est_sqft.string = f"{jobData['Total Area']} sqft"
+    est_sqft.string = f"{math.floor(jobData['Total Area'])} sqft"
     infoRow.append(est_sqft)
     customer_information.append(infoRow)
 
