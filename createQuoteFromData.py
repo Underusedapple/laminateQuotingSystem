@@ -1,3 +1,4 @@
+#TODO:add in pdf viewer to select pages. Allow user to select pages to quote, and to do multiple quotes doing multiple pages. Also create a button for quote all pages or all pages seperately.
 # TODO: add dynamic naming for same file name, add space to enter add-ons into quote, edit 'fingerprint' page
 # TODO: add in ability for a user to enter the file path for wkhtmltopdf.exe????
 from bs4 import BeautifulSoup
