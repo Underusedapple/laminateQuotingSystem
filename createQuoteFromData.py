@@ -8,7 +8,7 @@ import math
 from PyPDF2 import PdfMerger
 from datetime import date
 
-def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, add_on_dict):
+def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, add_on_dict, material):
     # Read the HTML file
 
     if jobData['Customer Name']:

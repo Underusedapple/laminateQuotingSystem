@@ -1,5 +1,5 @@
 import tkinter as tk
-from QuoteGenerator import QuoteGenerator
+from quoteGenerator import QuoteGenerator
 
 class MainWindow:
     def __init__(self):
