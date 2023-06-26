@@ -94,7 +94,7 @@ class QuoteGenerator:
 
 
     def import_pricing_data(self):
-        if self.material == 'SelfEdge':
+        if self.material == 'Self Edge':
             self.data_json = r"jsons\lam_pricing_data.json"
         elif self.material == 'Stone':
             self.data_json = r"jsons\stone_pricing_data.json"
@@ -193,11 +193,10 @@ class QuoteGenerator:
         # get the sqft from the pdf data
 
         sqft = self.jobData["Total Area"]
-        if self.material == 'SelfEdge':
+        if self.material == 'Self Edge':
             pricing_levels = self.lam_quote(sqft,multiplier)
-            print(self.jobData["Finished Lnft"])
+            #This is to make the linear edging in multiplicatives of 12 as that's what we order the material lengths in
             self.jobData["Finished Lnft"] = math.ceil(self.jobData["Finished Lnft"]*1.333 /12) *12
-            print(self.jobData["Finished Lnft"])
         if self.material == 'Stone':
             pricing_levels = self.stone_quote(sqft,multiplier)
 
@@ -210,7 +209,7 @@ class QuoteGenerator:
                 for edge in edge_pricing
         }
 
-        if self.material == 'SelfEdge':
+        if self.material == 'Self Edge':
             for edge in upgrade_edge_pricing:
                 upgrade_edge_pricing[edge] = math.ceil(upgrade_edge_pricing[edge] * multiplier)
 
@@ -586,7 +585,7 @@ class QuoteGenerator:
         # lsit of buttons for later?
         btns = []
 
-        if self.material == 'SelfEdge':
+        if self.material == 'Self Edge':
             button_organizer = [
                     Stone_Level_Button,
                     Edge_and_Add_On_Button,

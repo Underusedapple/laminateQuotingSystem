@@ -18,7 +18,7 @@ class MainWindow:
 
     def stocked_self_edge_quote(self):
         stone_quote = tk.Tk() 
-        QuoteGenerator(stone_quote,'SelfEdge')
+        QuoteGenerator(stone_quote,'Self Edge')
 
     def stocked_stone_quote(self):
         lam_quote = tk.Tk()

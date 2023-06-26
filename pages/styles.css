@@ -22,7 +22,7 @@ header {
   text-align: center;
   background-color: rgb(5,1,52);
   color: #fff;
-  padding: .20in;
+  padding: .10in;
 }
 
 header h1 {
@@ -33,9 +33,11 @@ header h1 {
 
 header p {
   font-size: .20in;
-  margin-top: .25in;
-  margin-bottom: .10in;
+  margin-top: .0in;
+  margin-bottom: 0in;
 }
+
+
 
 /* Main content styles */
 .main-content {
@@ -134,7 +136,7 @@ td {
 
 .fingerprint p1 {
   font-size: .135in;
-  font-style: bold;
+  font-weight: Bold;
 }
 
 
