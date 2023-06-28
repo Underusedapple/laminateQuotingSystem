@@ -161,7 +161,7 @@ def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, 
                         Are Acheived Through A Balance Of Layout Design And Maximizing Material Yields. Customer Specified Seam Locations, Layout Design, And/Or Special Slab
                         Selections May Impact Material Yields And Increase Costs Resulting In Additional Charges.'''
 
-
+    field_veri_text = '**Price Subject to change pending final field verification**'
 
     fp1 = soup.new_tag('p1')
     fp2 = soup.new_tag('p2')
@@ -169,11 +169,11 @@ def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, 
     fp4 = soup.new_tag('p2')
     line1 = soup.new_tag('p')
     line2 = soup.new_tag('p')
-    # fp_parts = [fp1,fp2,fp3,fp4]
+
+
+
+
     fp1.string, fp2.string,fp3.string,fp4.string = price_includes,included_text,price_excludes,excluded_text
-    # fp1= price_includes
-    # fp3= price_excludes
-    
 
     line1.append(fp1)
     line1.append(fp2)
@@ -182,11 +182,14 @@ def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, 
 
     fingerprint_section.append(line1)
     fingerprint_section.append(line2)
-    # for section in fp_parts:
-        # fingerprint_section.append(section)
 
 
 
+
+    if material == 'Stone':
+        field_ver_line = soup.new_tag('p1')
+        field_ver_line.string = field_veri_text
+        fingerprint_section.append(field_ver_line)
 
 
 
@@ -258,7 +261,7 @@ def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, 
                                     "page-size": "A4",
                                     "margin-top": "1.25in",
                                     "margin-right": "0.00in",
-                                    "margin-bottom": ".285in",
+                                    "margin-bottom": ".55in",
                                     "margin-left": "0.00in",
                                     "header-html": r"pages\header.html",
                                     "header-spacing" : "0",

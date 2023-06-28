@@ -3,7 +3,6 @@ import glob
 from PIL import ImageTk, Image,ImageOps
 from pdf2image import convert_from_path
 import os
-import math
 
 pdf_path = r"Pricing_Testing_Job.pdf"
 output_path = os.path.abspath(os.getcwd()) + r"\testing pdf 2 image\output_directory"
