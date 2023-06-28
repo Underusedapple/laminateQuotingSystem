@@ -1,5 +1,6 @@
+#TODO:add in pdf viewer to select pages. Allow user to select pages to quote, and to do multiple quotes doing multiple pages. Also create a button for quote all pages or all pages seperately.
 # TODO: add dynamic naming for same file name, add space to enter add-ons into quote, edit 'fingerprint' page
-# TODO: add in ability for a user to enter the file path for wkhtmltopdf.exe????
+# TODO: make sure pricing is dynamic to include if price is under $250
 from bs4 import BeautifulSoup
 import pdfkit
 import os
@@ -7,8 +8,10 @@ import math
 from PyPDF2 import PdfMerger
 from datetime import date
 
-def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, add_on_dict):
+def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, add_on_dict, material):
     # Read the HTML file
+
+    
 
     if jobData['Customer Name']:
         customerName = jobData['Customer Name']
@@ -25,6 +28,10 @@ def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, 
 
     # Parse the HTML using BeautifulSoup
     soup = BeautifulSoup(pricing_page_content, 'html.parser')
+
+    tier_label = soup.find(id='tier-label')
+
+    tier_label.string = f'Stocked {material} Tiers'
     
     # Populate granite tiers
     customer_information = soup.find(id='customer-information')
@@ -46,7 +53,7 @@ def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, 
 
     font_size = getFontSize(len(stone_dict),maxFontSize)
 
-    #pupulate pricing row
+    #populate pricing row
     infoRow = soup.new_tag('tr')
     customer_name = soup.new_tag('td')
     customer_name.string = customerName
@@ -63,8 +70,8 @@ def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, 
 
 
 
-    # Populate granite tiers
-    granite_tiers = soup.find(id='stone-tiers')
+    # Populate  tiers
+    tiers = soup.find(id='stone-tiers')
     for tier in stone_dict:
 
 
@@ -95,17 +102,21 @@ def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, 
 
 
         row.append(est_sqft)
-        granite_tiers.append(row)
+        tiers.append(row)
 
 
     # Populate edge options
     edge_options = soup.find(id='edge-options')
 
-    #Eased edge always as included option first
+    #Basic Edge always as included first
 
     easedEdgeRow = soup.new_tag('tr')
     eased_option_name = soup.new_tag('td')
-    eased_option_name.string = "Eased"
+
+    if material == 'Self Edge':
+        eased_option_name.string = "Self Edge"
+    elif material == 'Stone':
+        eased_option_name.string = "Eased"
     easedEdgeRow.append(eased_option_name)
 
 
@@ -136,12 +147,49 @@ def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, 
 
 
 
+    fingerprint_section = soup.find(id= 'fingerprint')
+    price_includes = "**Prices Incude: "
+    price_excludes = "**Prices Exclude: "
+
+    if material == 'Self Edge':
+        included_text = '3/4" Particleboard Construction and Regular Route Warehouse Delivery'
+        excluded_text = 'Site Delivery (unless noted on page 2), Distribution, Measuring, or Installation'
+    elif material == 'Stone':
+        included_text = 'Templating, Fabrication, Standard Finish, and Installation'
+        excluded_text = '''Removal Of Existing Tops, Brackets, Supports, Carpentry Work, Appliance Placement, Plumbing & Electrical Hookup, Or Equipment & Operator To Lift 
+                        Countertops For Upper Level Installations. Customer Must Advise If Area Of Installation Requires Access Via Stairs / Steps. Fenco'S Competitive Prices
+                        Are Acheived Through A Balance Of Layout Design And Maximizing Material Yields. Customer Specified Seam Locations, Layout Design, And/Or Special Slab
+                        Selections May Impact Material Yields And Increase Costs Resulting In Additional Charges.'''
+
+    field_veri_text = '**Price Subject to change pending final field verification**'
+
+    fp1 = soup.new_tag('p1')
+    fp2 = soup.new_tag('p2')
+    fp3 = soup.new_tag('p1')
+    fp4 = soup.new_tag('p2')
+    line1 = soup.new_tag('p')
+    line2 = soup.new_tag('p')
 
 
 
 
+    fp1.string, fp2.string,fp3.string,fp4.string = price_includes,included_text,price_excludes,excluded_text
+
+    line1.append(fp1)
+    line1.append(fp2)
+    line2.append(fp3)
+    line2.append(fp4)
+
+    fingerprint_section.append(line1)
+    fingerprint_section.append(line2)
 
 
+
+
+    if material == 'Stone':
+        field_ver_line = soup.new_tag('p1')
+        field_ver_line.string = field_veri_text
+        fingerprint_section.append(field_ver_line)
 
 
 
@@ -199,14 +247,7 @@ def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, 
     with open(r"pages\add_on_page.html", 'w') as file:
         file.write(str(soup))
 
-    #this is to bypass when i use my person computer vs using my work computer
-    #the configuration is necessary regardless of using two different computers
-    # TODO:replace pdfkit_config with the file path to your wkhtmltopdf.exe 
-    if os.environ['COMPUTERNAME'] == 'GREGORYLEE':
-        pdfkit_config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files (x86)\wkhtmltopdf\bin\wkhtmltopdf.exe')
-    else:
-        pdfkit_config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
-
+    pdfkit_config = pdfkit.configuration(wkhtmltopdf= r'wkhtmltopdf\bin\wkhtmltopdf.exe')
     #create pdf
     pages = [r"pages\pricing_page.html", r"pages\add_on_page.html" ]
     page_pdf_files = [] #this will be the file paths of the pdfs created
@@ -220,7 +261,7 @@ def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, 
                                     "page-size": "A4",
                                     "margin-top": "1.25in",
                                     "margin-right": "0.00in",
-                                    "margin-bottom": ".285in",
+                                    "margin-bottom": ".55in",
                                     "margin-left": "0.00in",
                                     "header-html": r"pages\header.html",
                                     "header-spacing" : "0",
@@ -274,4 +315,3 @@ def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, 
     os.startfile(new_file_path)
 
     
-

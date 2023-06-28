@@ -31,11 +31,11 @@ class Fab_Cost_Mark_Up_button(tk.Button):
 
         # update json (i currently have it rewriting all data just for simplicity, could only update the pricing data for effeciency)
         dumped_new_data = json.dumps(self.pricing_data, indent=4)
-        with open(r"jsons\pricing_data.json", "w") as pricing_data_json:
+        with open(self.main.data_json, "w") as pricing_data_json:
             pricing_data_json.write(dumped_new_data)
 
         # this is a verification that the password saved correctly
-        with open(r"jsons\pricing_data.json", "r") as pricing_data_json:
+        with open(self.main.data_json, "r") as pricing_data_json:
             pricing_data = json.load(pricing_data_json)
 
         if pricing_data[self.json_locator] == new_data:
@@ -88,7 +88,7 @@ class Fab_Cost_Mark_Up_button(tk.Button):
 
 if __name__ == "__main__":
     # # load data from json file
-    with open(r"jsons\pricing_data.json", "r") as pricing_data_json:
+    with open(r"jsons\stone_pricing_data.json", "r") as pricing_data_json:
         pricing_data = json.load(pricing_data_json)
 
     # window no frame

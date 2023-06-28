@@ -43,11 +43,11 @@ class Edge_and_Add_On_Button(tk.Button):
 
         # update json (i currently have it rewriting all data just for simplicity, could only update the pricing data for effeciency)
         dumped_new_data = json.dumps(self.pricing_data, indent=4)
-        with open(r"jsons\pricing_data.json", "w") as pricing_data_json:
+        with open(self.main.data_json, "w") as pricing_data_json:
             pricing_data_json.write(dumped_new_data)
 
         # this is a verification that the password saved correctly
-        with open(r"jsons\pricing_data.json", "r") as pricing_data_json:
+        with open(self.main.data_json, "r") as pricing_data_json:
             pricing_data = json.load(pricing_data_json)
 
         if pricing_data[self.json_locator] == new_data:
@@ -158,8 +158,6 @@ class Edge_and_Add_On_Button(tk.Button):
         widget = event.widget
         input = widget.get("1.0", tk.END)
         input = input.strip()
-        test = re.fullmatch(r"^([0-9]?)+[.]?([0-9]?)+$", input)
-        print(test)
         if re.fullmatch(r"^([0-9]?)+[.]?([0-9]?)+$", input) == None:
             messagebox.showerror("Invalid Price", "Please inser a valid float number.")
             widget.focus_set()
@@ -185,16 +183,16 @@ class Edge_and_Add_On_Button(tk.Button):
         self.tbox_lists = [self.name_tboxes, self.price_tboxes]
 
         # create textboxes
-        for edge in json_data:
+        for add_on in json_data:
 
             # make tboxs as variables
             new_name_box = [
                 Multi_data_textbox(self.edit_page_frame, height=3, width=20),
-                edge,
+                add_on,
             ]
             new_price_box = [
                 Multi_data_textbox(self.edit_page_frame, height=3, width=20),
-                json_data[edge],
+                json_data[add_on],
             ]
 
             # bind tab to new focus so you can loops the objects with tab
@@ -249,7 +247,7 @@ class Multi_data_textbox(tk.Text):
 
 if __name__ == "__main__":
     # # load data from json file
-    with open(r"jsons\pricing_data.json", "r") as pricing_data_json:
+    with open(r"jsons\stone_pricing_data.json", "r") as pricing_data_json:
         pricing_data = json.load(pricing_data_json)
 
     # window no frame
