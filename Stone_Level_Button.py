@@ -1,3 +1,4 @@
+##TODO:make scroll bar changes to other buttons
 # python 3.9.12
 ###made it so that tab funciton correctly, can add and delete rows that update the json correctly
 # now to work on other buttons that update the data, probably wnat to start easy with the direct data buttons
@@ -55,7 +56,7 @@ class Stone_Level_Button(tk.Button):
         # update pricing data
         if self.main.material == 'Stone':
             levels = 'stone_levels'
-        elif self.main.material == 'SelfEdge':
+        elif self.main.material == 'Self Edge':
             levels = 'lam_levels'
         self.pricing_data[levels] = new_data
 
@@ -147,16 +148,56 @@ class Stone_Level_Button(tk.Button):
             # remove tbox from grid
             textbox_to_delete.grid_remove()
 
+    def onFrameConfigure(self, event):
+        '''Reset the scroll region to encompass the inner frame'''
+        self.textbox_canvas.configure(scrollregion=self.textbox_canvas.bbox("all"))
+
     def button_do(self):
         # hide edit info buttons
-        self.main.edit_info_btn_page.withdraw()
+        # self.main.edit_info_btn_page.withdraw()
+        #TODO: Uncomment this line ^^
 
         # pull stone levels from pricing data
         json_data = self.pricing_data[self.json_locator]
 
         # create new window
-        self.edit_page_frame = tk.Toplevel()
-        self.edit_page_frame.title("TextBox Input")
+        self.popup = tk.Toplevel()
+        self.popup.title("TextBox Input")
+
+        self.popup.rowconfigure(0, weight=1) 
+        self.popup.columnconfigure(0, weight=1)
+
+        scrollbar=tk.Scrollbar(self.popup, orient=tk.VERTICAL)
+        scrollbar.grid(row=0, column=1, sticky="ns")
+
+        self.textbox_canvas = tk.Canvas(self.popup, width=500,
+                         scrollregion=(0,0,500,800)) #width=1256, height = 1674)
+        self.textbox_canvas.grid(row=0, column=0, sticky="nsew") #added sticky
+
+
+        self.edit_page_frame = tk.Frame(self.textbox_canvas)
+        self.edit_page_frame.bind("<Configure>", self.onFrameConfigure)
+
+        scrollbar.config(command=self.textbox_canvas.yview)
+        self.textbox_canvas.config(yscrollcommand = scrollbar.set)
+
+
+        self.textbox_canvas.create_window((4,4),window=self.edit_page_frame,anchor='nw',tags='self.frame')
+
+
+
+        
+        # scrollbar = tk.Scrollbar(self.popup)
+        # print(len(json_data))
+        # scrollbar.pack(fill=tk.Y, side=tk.RIGHT, expand=tk.FALSE)
+
+        # self.edit_page_frame = tk.Canvas(self.popup,height=5, width=10, scrollregion=(0,0,100,200),confine=False)
+        # self.edit_page_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=tk.TRUE)
+
+
+        # self.edit_page_frame.config(yscrollcommand=scrollbar.set)
+        # scrollbar.configure(command=self.edit_page_frame.yview)
+
 
         # TextBox Creation
         # lists to store tbox and the corresponding inputs
@@ -172,6 +213,12 @@ class Stone_Level_Button(tk.Button):
         ]
 
         for input in json_data:
+
+
+            # self.edit_page_frame.config(yscrollcommand = scrollbar.set)
+
+
+            # scrollbar.config(command=self.edit_page_frame.yview)
 
             # make tboxs as variables
             new_name_box = [
@@ -192,7 +239,7 @@ class Stone_Level_Button(tk.Button):
             new_color_box[0].bind("<Tab>", self.focus_next_window)
             new_price_box[0].bind("<Tab>", self.focus_next_window)
 
-            # add buttons to list
+            # add boxes to list
             self.stone_level_name_box.append(new_name_box)
             self.stone_level_color_box.append(
                 new_color_box
@@ -240,7 +287,7 @@ class Stone_Level_Button(tk.Button):
         )
         self.delete_row_button.grid(row=x + 1, column=1)
 
-        self.edit_page_frame.mainloop()
+        self.popup.mainloop()
 
 
 class Multi_data_textbox(tk.Text):
@@ -266,7 +313,7 @@ if __name__ == "__main__":
 
     # make and add buttons to list
     for data in pricing_data:
-        btns.append(Stone_Level_Button(window, pricing_data, data))
+        btns.append(Stone_Level_Button(window, pricing_data, data, name='stone_levels'))
 
     # pack buttons onto window
     for n, btn in enumerate(btns):

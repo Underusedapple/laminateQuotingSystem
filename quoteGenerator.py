@@ -197,7 +197,7 @@ class QuoteGenerator:
             pricing_levels = self.lam_quote(sqft,multiplier)
             #This is to make the linear edging in multiplicatives of 12 as that's what we order the material lengths in
             self.jobData["Finished Lnft"] = math.ceil(self.jobData["Finished Lnft"]*1.333 /12) *12
-        if self.material == 'Stone':
+        elif self.material == 'Stone':
             pricing_levels = self.stone_quote(sqft,multiplier)
 
 
@@ -212,6 +212,10 @@ class QuoteGenerator:
         if self.material == 'Self Edge':
             for edge in upgrade_edge_pricing:
                 upgrade_edge_pricing[edge] = math.ceil(upgrade_edge_pricing[edge] * multiplier)
+        elif self.material == 'Stone':
+            for edge in upgrade_edge_pricing:
+                upgrade_edge_pricing[edge] = math.ceil(upgrade_edge_pricing[edge] * 2 * multiplier)
+                
 
         createQuoteFromData(self.jobData,pricing_levels,upgrade_edge_pricing,self.folderpath,self.filepath,self.add_on_quants,self.material)
 

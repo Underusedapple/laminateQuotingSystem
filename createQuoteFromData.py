@@ -161,7 +161,7 @@ def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, 
                         Are Acheived Through A Balance Of Layout Design And Maximizing Material Yields. Customer Specified Seam Locations, Layout Design, And/Or Special Slab
                         Selections May Impact Material Yields And Increase Costs Resulting In Additional Charges.'''
 
-    field_veri_text = '**Price Subject to change pending final field verification**'
+    field_veri_text = '**Price subject to change pending final field verification**'
 
     fp1 = soup.new_tag('p1')
     fp2 = soup.new_tag('p2')
