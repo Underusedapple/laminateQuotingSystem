@@ -1,6 +1,5 @@
 #TODO:add in pdf viewer to select pages. Allow user to select pages to quote, and to do multiple quotes doing multiple pages. Also create a button for quote all pages or all pages seperately.
 # TODO: add dynamic naming for same file name, add space to enter add-ons into quote, edit 'fingerprint' page
-# TODO: add in ability for a user to enter the file path for wkhtmltopdf.exe????
 # TODO: make sure pricing is dynamic to include if price is under $250
 from bs4 import BeautifulSoup
 import pdfkit
@@ -245,14 +244,7 @@ def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, 
     with open(r"pages\add_on_page.html", 'w') as file:
         file.write(str(soup))
 
-    #this is to bypass when i use my person computer vs using my work computer
-    #the configuration is necessary regardless of using two different computers
-    # TODO:replace pdfkit_config with the file path to your wkhtmltopdf.exe 
-    if os.environ['COMPUTERNAME'] == 'GREGORYLEE':
-        pdfkit_config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files (x86)\wkhtmltopdf\bin\wkhtmltopdf.exe')
-    else:
-        pdfkit_config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
-
+    pdfkit_config = pdfkit.configuration(wkhtmltopdf= r'wkhtmltopdf\bin\wkhtmltopdf.exe')
     #create pdf
     pages = [r"pages\pricing_page.html", r"pages\add_on_page.html" ]
     page_pdf_files = [] #this will be the file paths of the pdfs created
