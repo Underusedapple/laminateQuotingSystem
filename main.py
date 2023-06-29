@@ -18,11 +18,14 @@ class MainWindow:
 
     def stocked_self_edge_quote(self):
         stone_quote = tk.Tk() 
-        QuoteGenerator(stone_quote,'Self Edge')
+        QuoteGenerator(stone_quote,'Self Edge',self)
+        self.root.withdraw()
 
     def stocked_stone_quote(self):
         lam_quote = tk.Tk()
-        QuoteGenerator(lam_quote,'Stone')
+        QuoteGenerator(lam_quote,'Stone',self)
+        self.root.withdraw()
+
 
     def run(self):
         self.root.mainloop()

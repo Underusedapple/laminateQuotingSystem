@@ -282,7 +282,7 @@ def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, 
 
 
     #new path name
-    new_file_path = fr"{folder_path}\{customerName}_{jobName}_StoneQuote_{todaysDate}.pdf"
+    new_file_path = fr"{folder_path}\{customerName}_{jobName}_{material.replace(' ','_')}_Quote_{todaysDate}.pdf"
 
     #check for existing path
     quoteVersion = 1

@@ -20,9 +20,11 @@ from createQuoteFromData import createQuoteFromData
 
 
 class QuoteGenerator:
-    def __init__(self, master, material):
+    def __init__(self, master, material, main):
         """Application used for quoting stocked materials from drawings """
         
+
+        self.main = main
         
         self.material = material
 
@@ -30,6 +32,7 @@ class QuoteGenerator:
 
         #create master frame
         self.master = master
+
         self.master.rowconfigure(0, weight=2)
         self.master.rowconfigure(1, weight=1)
         self.master.rowconfigure(2, weight=5)
@@ -40,7 +43,7 @@ class QuoteGenerator:
 
 
         #create directory frame (where you pick the file)
-        self.directory_frm = tk.Frame(master=master, relief=tk.SUNKEN, borderwidth=2)
+        self.directory_frm = tk.Frame(master=self.master, relief=tk.SUNKEN, borderwidth=2)
         self.directory_frm.grid(
             row=0, column=0, sticky="news"
         )  # this is the frame for the directory
@@ -52,7 +55,7 @@ class QuoteGenerator:
 
 
         #create multiplier frame
-        self.multiplier_frm = tk.Frame(master=master, relief=tk.FLAT, borderwidth=2)
+        self.multiplier_frm = tk.Frame(master=self.master, relief=tk.FLAT, borderwidth=2)
         self.multiplier_frm.grid(row=1, column=0, sticky="news")
         self.multiplier_frm.rowconfigure(index=0, weight=1)
         self.multiplier_frm.rowconfigure(index=1, weight=1)
@@ -64,14 +67,14 @@ class QuoteGenerator:
 
 
         #create add-ons frame
-        self.add_on_frm = tk.Frame(master=master, relief=tk.SUNKEN, borderwidth=2)
+        self.add_on_frm = tk.Frame(master=self.master, relief=tk.SUNKEN, borderwidth=2)
         self.add_on_frm.grid(
             row=2, column=0, sticky="news"
         ) 
 
 
         #create buttons frame
-        self.button_frm = tk.Frame(master=master, relief=tk.RAISED, borderwidth=2)
+        self.button_frm = tk.Frame(master=self.master, relief=tk.RAISED, borderwidth=2)
         self.button_frm.grid(row=3, column=0, sticky="news") 
         for x in range(3):
             self.button_frm.columnconfigure(index=x, weight=2)
@@ -85,12 +88,18 @@ class QuoteGenerator:
         self.load_add_on_frame()
         self.load_button_frame()
 
+
+
+        self.master.protocol("WM_DELETE_WINDOW", self.on_closing)
         # # TODO: uncomment for testing
         # self.submit_button()
 
 
 
 
+    def on_closing(self):
+        self.main.root.destroy()
+        self.master.destroy()
 
 
     def import_pricing_data(self):
@@ -134,8 +143,9 @@ class QuoteGenerator:
 
             #laminate minumum $250 check
             if lam_levels[level]['Price'] < 250:
+                full_charge = self.pricing_data['add_ons']['trip_charge']* multiplier
                 current_level_price = lam_levels[level]['Price']
-                increase_options = [250 - current_level_price,(self.pricing_data['add_ons']['trip_charge'])* multiplier] #price is the lower of either the difference or half a trip charge
+                increase_options = [250 - current_level_price,full_charge] #price is the lower of either the difference or half a trip charge
                 price_increase = min(increase_options)
                 print(price_increase, 'options where', increase_options)
                 lam_levels[level]['Price'] = math.ceil(current_level_price + price_increase)
@@ -455,7 +465,7 @@ class QuoteGenerator:
     
     def advanced_button_cmd(self):
         """Opens window for advanced options""" 
-
+            
 
 
         #password check
@@ -465,6 +475,7 @@ class QuoteGenerator:
         while not self.check_password(passwordbytes):
 
             password = tk.simpledialog.askstring("", "Enter password:", show="*")
+            
             
             passwordbytes = password.encode("utf-8")
 
@@ -477,7 +488,8 @@ class QuoteGenerator:
 
 
 
-        self.advanced_window = tk.Toplevel()
+        self.advanced_window = tk.Toplevel()   
+        self.advanced_window.resizable(False,False)
         self.advanced_window.rowconfigure(0,weight=1,pad=10)
         self.advanced_window.rowconfigure(1,weight=1,pad=10)
         self.advanced_window.columnconfigure(0,weight=1,pad=10)
@@ -487,29 +499,9 @@ class QuoteGenerator:
         chnge_pssword_btn = tk.Button(
             self.advanced_window, text="Change Password", command=self.change_password_cmd
         ).grid(column=0,row=1, sticky='nsew', padx=5, pady=3)
-
     def change_password_cmd(self):
         """Opens frame to update password and save"""
-        self.edit_pswrd_frame = tk.Toplevel()
-        old_password_lbl = tk.Label(
-            self.edit_pswrd_frame, text="Enter your old password:"
-        ).grid(row=0, column=0)
-        old_password_ent = tk.Entry(self.edit_pswrd_frame, show="*")
-        old_password_ent.grid(row=0, column=1)
-
-        new_password_1_lbl = tk.Label(
-            self.edit_pswrd_frame, text="Please enter your new password:"
-        ).grid(row=1, column=0)
-        new_password_1_ent = tk.Entry(self.edit_pswrd_frame, show="*")
-        new_password_1_ent.grid(row=1, column=1)
-
-        new_password_2_lbl = tk.Label(
-            self.edit_pswrd_frame, text="Please enter your new password again:"
-        ).grid(row=2, column=0)
-        new_password_2_ent = tk.Entry(self.edit_pswrd_frame, show="*")
-        new_password_2_ent.grid(row=2, column=1)
-
-        def submit_password():
+        def submit_password(*args):
             old_pass_txt = old_password_ent.get().strip()
             pass1_txt = new_password_1_ent.get().strip()
             pass2_txt = new_password_2_ent.get().strip()
@@ -572,7 +564,31 @@ class QuoteGenerator:
                 self.advanced_window.focus_set()
 
         def cancel_button():
-            pass
+            self.edit_pswrd_frame.destroy()
+
+
+        self.edit_pswrd_frame = tk.Toplevel()
+        self.edit_pswrd_frame.resizable(False,False)
+        old_password_lbl = tk.Label(
+            self.edit_pswrd_frame, text="Enter your old password:"
+        ).grid(row=0, column=0)
+        old_password_ent = tk.Entry(self.edit_pswrd_frame, show="*")
+        old_password_ent.grid(row=0, column=1)
+
+        new_password_1_lbl = tk.Label(
+            self.edit_pswrd_frame, text="Please enter your new password:"
+        ).grid(row=1, column=0)
+        new_password_1_ent = tk.Entry(self.edit_pswrd_frame, show="*")
+        new_password_1_ent.grid(row=1, column=1)
+
+        new_password_2_lbl = tk.Label(
+            self.edit_pswrd_frame, text="Please enter your new password again:"
+        ).grid(row=2, column=0)
+        new_password_2_ent = tk.Entry(self.edit_pswrd_frame, show="*")
+        new_password_2_ent.grid(row=2, column=1)
+        new_password_2_ent.bind('<Return>',submit_password)
+
+        
 
         submit_password_btn = tk.Button(
             self.edit_pswrd_frame, text="Submit Password", command=submit_password
@@ -588,6 +604,7 @@ class QuoteGenerator:
         self.advanced_window.destroy()
         # window no frame
         self.edit_info_btn_page = tk.Toplevel()
+        self.edit_info_btn_page.resizable(False,False)
         for z, data in enumerate(self.pricing_data):
             self.edit_info_btn_page.rowconfigure(z, weight=1,pad=10)
         self.edit_info_btn_page.columnconfigure(0, weight=1)
