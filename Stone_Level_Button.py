@@ -113,28 +113,7 @@ class Stone_Level_Button(tk.Button):
         new_color_box[0].grid(row=len(self.stone_level_color_box) - 1, column=1)
         new_price_box[0].grid(row=len(self.stone_level_price_box) - 1, column=2)
 
-        # below funcitons reset the tab order by deleting and recreating the buttons
 
-        # delete buttons
-        self.submit_button.destroy()
-        self.new_row_button.destroy()
-        self.delete_row_button.destroy()
-
-        # remake buttons
-        self.submit_button = tk.Button(
-            self.edit_page_frame, command=self.submit_cmd, text="Submit"
-        )
-        self.new_row_button = tk.Button(
-            self.edit_page_frame, command=self.add_new_level, text="Add New Row"
-        )
-        self.delete_row_button = tk.Button(
-            self.edit_page_frame, command=self.delete_level, text="Delete Bottom Row"
-        )
-
-        # grid buttons
-        self.submit_button.grid(row=len(self.stone_level_price_box), column=0)
-        self.new_row_button.grid(row=len(self.stone_level_price_box), column=2)
-        self.delete_row_button.grid(row=len(self.stone_level_price_box) + 1, column=0)
 
     def delete_level(self):
         # deletes the last row
@@ -147,6 +126,11 @@ class Stone_Level_Button(tk.Button):
 
             # remove tbox from grid
             textbox_to_delete.grid_remove()
+
+
+    def _on_mousewheel(self, event):
+        self.textbox_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
 
     def onFrameConfigure(self, event):
         '''Reset the scroll region to encompass the inner frame'''
@@ -162,24 +146,36 @@ class Stone_Level_Button(tk.Button):
 
         # create new window
         self.popup = tk.Toplevel()
+        self.popup.resizable(False, False)
         self.popup.title("TextBox Input")
 
         self.popup.rowconfigure(0, weight=1) 
+        self.popup.rowconfigure(1, weight=1) 
+
         self.popup.columnconfigure(0, weight=1)
 
         scrollbar=tk.Scrollbar(self.popup, orient=tk.VERTICAL)
         scrollbar.grid(row=0, column=1, sticky="ns")
 
         self.textbox_canvas = tk.Canvas(self.popup, width=500,
-                         scrollregion=(0,0,500,800)) #width=1256, height = 1674)
-        self.textbox_canvas.grid(row=0, column=0, sticky="nsew") #added sticky
+                         scrollregion=(0,0,500,800)) 
+        self.textbox_canvas.grid(row=0, column=0, sticky="nsew") 
+        self.textbox_canvas.bind_all("<MouseWheel>",self._on_mousewheel)
 
 
         self.edit_page_frame = tk.Frame(self.textbox_canvas)
         self.edit_page_frame.bind("<Configure>", self.onFrameConfigure)
-
+        
         scrollbar.config(command=self.textbox_canvas.yview)
         self.textbox_canvas.config(yscrollcommand = scrollbar.set)
+
+
+
+        self.button_frame = tk.Frame(self.popup)
+        self.button_frame.columnconfigure(0,weight=1)
+        self.button_frame.columnconfigure(1,weight=1)
+
+        self.button_frame.grid(row=1,column=0, pady=5)
 
 
         self.textbox_canvas.create_window((4,4),window=self.edit_page_frame,anchor='nw',tags='self.frame')
@@ -273,19 +269,19 @@ class Stone_Level_Button(tk.Button):
 
         # create buttons
         self.submit_button = tk.Button(
-            self.edit_page_frame, command=self.submit_cmd, text="Submit"
+            self.button_frame, command=self.submit_cmd, text="Submit", height=3, width=25, background='#D0D0D0'
         )
-        self.submit_button.grid(row=x + 2, column=0)
+        self.submit_button.grid(row=1, column=0,columnspan=2,padx=20,pady=5)
 
         self.new_row_button = tk.Button(
-            self.edit_page_frame, command=self.add_new_level, text="Add New Row"
+            self.button_frame, command=self.add_new_level, text="Add New Row", height=2, width=15
         )
-        self.new_row_button.grid(row=x + 1, column=0)
+        self.new_row_button.grid(row=0, column=1,padx=20,pady=5)
 
         self.delete_row_button = tk.Button(
-            self.edit_page_frame, command=self.delete_level, text="Delete Bottom Row"
+            self.button_frame, command=self.delete_level, text="Delete Bottom Row", height=2, width=15
         )
-        self.delete_row_button.grid(row=x + 1, column=1)
+        self.delete_row_button.grid(row=0, column=0)
 
         self.popup.mainloop()
 
