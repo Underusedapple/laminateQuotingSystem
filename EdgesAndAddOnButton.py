@@ -77,11 +77,11 @@ class Edge_and_Add_On_Button(tk.Button):
 
         # make new textboxes
         new_name_box = [
-            Multi_data_textbox(self.edit_page_frame, height=3, width=20),
+            Multi_data_textbox(self.edit_page_frame, height=3, width=31),
             "",
         ]
         new_price_box = [
-            Multi_data_textbox(self.edit_page_frame, height=3, width=20),
+            Multi_data_textbox(self.edit_page_frame, height=3, width=30),
             "",
         ]
 
@@ -99,28 +99,7 @@ class Edge_and_Add_On_Button(tk.Button):
         new_name_box[0].grid(row=len(self.name_tboxes) - 1, column=0)
         new_price_box[0].grid(row=len(self.price_tboxes) - 1, column=1)
 
-        # below funcitons reset the tab order by deleting and recreating the buttons
 
-        # delete buttons
-        self.submit_button.destroy()
-        self.new_row_button.destroy()
-        self.delete_row_button.destroy()
-
-        # remake buttons
-        self.submit_button = tk.Button(
-            self.edit_page_frame, command=self.submit_cmd, text="Submit"
-        )
-        self.new_row_button = tk.Button(
-            self.edit_page_frame, command=self.add_new_level, text="Add New Row"
-        )
-        self.delete_row_button = tk.Button(
-            self.edit_page_frame, command=self.delete_level, text="Delete Bottom Row"
-        )
-
-        # grid buttons
-        self.submit_button.grid(row=len(self.price_tboxes), column=0)
-        self.new_row_button.grid(row=len(self.price_tboxes), column=1)
-        self.delete_row_button.grid(row=len(self.price_tboxes) + 1, column=0)
 
     def delete_level(self):
         # deletes the last row
