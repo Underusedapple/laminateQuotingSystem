@@ -10,7 +10,7 @@ from tkinter import messagebox
 
 
 # make buttons
-class Stone_Level_Button(tk.Button):
+class Material_Level_Button(tk.Button):
     def __init__(self, window, pricing_data, main, name="", *args, **kwargs):
         self.name = tk.StringVar()
         self.name.set(name.replace("_", " ").title())
@@ -139,7 +139,6 @@ class Stone_Level_Button(tk.Button):
     def button_do(self):
         # hide edit info buttons
         # self.main.edit_info_btn_page.withdraw()
-        #TODO: Uncomment this line ^^
 
         # pull stone levels from pricing data
         json_data = self.pricing_data[self.json_locator]
@@ -149,13 +148,8 @@ class Stone_Level_Button(tk.Button):
         self.popup.resizable(False, False)
         self.popup.title("TextBox Input")
 
-        self.popup.rowconfigure(0, weight=1) 
-        self.popup.rowconfigure(1, weight=1) 
-
-        self.popup.columnconfigure(0, weight=1)
-
-        scrollbar=tk.Scrollbar(self.popup, orient=tk.VERTICAL)
-        scrollbar.grid(row=0, column=1, sticky="ns")
+        self.scrollbar=tk.Scrollbar(self.popup, orient=tk.VERTICAL)
+        self.scrollbar.grid(row=0, column=1, sticky="ns")
 
         self.textbox_canvas = tk.Canvas(self.popup, width=500,
                          scrollregion=(0,0,500,800)) 
@@ -166,8 +160,8 @@ class Stone_Level_Button(tk.Button):
         self.edit_page_frame = tk.Frame(self.textbox_canvas)
         self.edit_page_frame.bind("<Configure>", self.onFrameConfigure)
         
-        scrollbar.config(command=self.textbox_canvas.yview)
-        self.textbox_canvas.config(yscrollcommand = scrollbar.set)
+        self.scrollbar.config(command=self.textbox_canvas.yview)
+        self.textbox_canvas.config(yscrollcommand = self.scrollbar.set)
 
 
 
@@ -183,16 +177,6 @@ class Stone_Level_Button(tk.Button):
 
 
         
-        # scrollbar = tk.Scrollbar(self.popup)
-        # print(len(json_data))
-        # scrollbar.pack(fill=tk.Y, side=tk.RIGHT, expand=tk.FALSE)
-
-        # self.edit_page_frame = tk.Canvas(self.popup,height=5, width=10, scrollregion=(0,0,100,200),confine=False)
-        # self.edit_page_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=tk.TRUE)
-
-
-        # self.edit_page_frame.config(yscrollcommand=scrollbar.set)
-        # scrollbar.configure(command=self.edit_page_frame.yview)
 
 
         # TextBox Creation
@@ -269,7 +253,7 @@ class Stone_Level_Button(tk.Button):
 
         # create buttons
         self.submit_button = tk.Button(
-            self.button_frame, command=self.submit_cmd, text="Submit", height=3, width=25, background='#D0D0D0'
+            self.button_frame, command=self.submit_cmd, text="Submit", height=3, width=25, background='#DDDDDD'
         )
         self.submit_button.grid(row=1, column=0,columnspan=2,padx=20,pady=5)
 
@@ -309,7 +293,7 @@ if __name__ == "__main__":
 
     # make and add buttons to list
     for data in pricing_data:
-        btns.append(Stone_Level_Button(window, pricing_data, data, name='stone_levels'))
+        btns.append(Material_Level_Button(window, pricing_data, data, name='stone_levels'))
 
     # pack buttons onto window
     for n, btn in enumerate(btns):

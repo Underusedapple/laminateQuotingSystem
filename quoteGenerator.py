@@ -11,7 +11,7 @@ from tkinter import filedialog as fd
 from tkinter import messagebox
 import math
 import bcrypt
-from Stone_Level_Button import Stone_Level_Button
+from Material_Level_Button import Material_Level_Button
 from FabCostAndMarkUpButton import Fab_Cost_Mark_Up_button
 from EdgesAndAddOnButton import Edge_and_Add_On_Button
 from ExtractDataFromPdf import extractDataFromPdf
@@ -591,7 +591,7 @@ class QuoteGenerator:
 
         if self.material == 'Self Edge':
             button_organizer = [
-                    Stone_Level_Button,
+                    Material_Level_Button,
                     Edge_and_Add_On_Button,
                     Edge_and_Add_On_Button
                 ]
@@ -600,7 +600,7 @@ class QuoteGenerator:
             button_organizer = [
                     Fab_Cost_Mark_Up_button,
                     Fab_Cost_Mark_Up_button,
-                    Stone_Level_Button,
+                    Material_Level_Button,
                     Edge_and_Add_On_Button,
                     Edge_and_Add_On_Button
                 ]

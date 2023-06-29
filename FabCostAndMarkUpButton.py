@@ -57,6 +57,7 @@ class Fab_Cost_Mark_Up_button(tk.Button):
 
         # create new window
         self.edit_page_frame = tk.Tk()
+        self.edit_page_frame.resizable(False,False)
         self.edit_page_frame.title("TextBox Input")
 
         # TextBox Creation
@@ -71,17 +72,17 @@ class Fab_Cost_Mark_Up_button(tk.Button):
         self.data_label = tk.Label(
             self.edit_page_frame, text=self.json_locator.replace("_", " ").title()
         )
-        self.data_label.grid(row=0, column=0)
+        self.data_label.grid(row=0, column=0, pady=5, padx=5)
 
         self.data_ent = tk.Entry(self.edit_page_frame)
         self.data_ent.insert(0, json_data)
-        self.data_ent.grid(row=0, column=1)
+        self.data_ent.grid(row=0, column=1, pady=5, padx=5)
 
         # create buttons
         self.submit_button = tk.Button(
-            self.edit_page_frame, command=self.submit_cmd, text="Submit"
+            self.edit_page_frame, command=self.submit_cmd, text="Submit", background='#DDDDDD'
         )
-        self.submit_button.grid(row=1, column=0, columnspan=2)
+        self.submit_button.grid(row=1, column=0, columnspan=2, pady=5)
 
         self.edit_page_frame.mainloop()
 
@@ -102,7 +103,7 @@ if __name__ == "__main__":
 
     # make and add buttons to list
     for data in pricing_data:
-        btns.append(Fab_Cost_Mark_Up_button(window, pricing_data, data))
+        btns.append(Fab_Cost_Mark_Up_button(window, pricing_data, data,name='fabrication_cost'))
 
     # pack buttons onto window
     for n, btn in enumerate(btns):
