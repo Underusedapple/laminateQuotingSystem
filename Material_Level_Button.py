@@ -77,7 +77,7 @@ class Material_Level_Button(tk.Button):
             )
         self.main.edit_info_btn_page.deiconify()
         self.main.edit_info_btn_page.focus_set()
-        self.edit_page_frame.destroy()
+        self.popup.destroy()
 
     def add_new_level(self):
         # this creates a new row for stone

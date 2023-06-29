@@ -118,7 +118,7 @@ class QuoteGenerator:
 
         #lambda for getting final price of laminate by multiplying level price by sqft, adding in add-ons
         #multiplying by 2 and then multiply by customer multiplier
-        get_final_stone_price = lambda material_sqft_cost: math.ceil(
+        get_final_lam_price = lambda material_sqft_cost: math.ceil(
                 (((material_sqft_cost * sqft) + sum(add_on_price.values())) * 2) * multiplier)
         
 
@@ -127,10 +127,18 @@ class QuoteGenerator:
 
         #change dictionary of levels to also have a price?
 
-        for stone_level in lam_levels:
-            sqft_cost = lam_levels[stone_level]['Price'] #prettify the get final price
+        for level in lam_levels:
+            sqft_cost = lam_levels[level]['Price'] #prettify the get final price
 
-            lam_levels[stone_level]['Price'] = get_final_stone_price(sqft_cost)
+            lam_levels[level]['Price'] = get_final_lam_price(sqft_cost)
+
+            #laminate minumum $250 check
+            if lam_levels[level]['Price'] < 250:
+                current_level_price = lam_levels[level]['Price']
+                increase_options = [250 - current_level_price,(self.pricing_data['add_ons']['trip_charge'])* multiplier] #price is the lower of either the difference or half a trip charge
+                price_increase = min(increase_options)
+                print(price_increase, 'options where', increase_options)
+                lam_levels[level]['Price'] = math.ceil(current_level_price + price_increase)
 
 
 
