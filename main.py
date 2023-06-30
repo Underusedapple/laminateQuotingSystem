@@ -40,7 +40,7 @@ class QuoteGenerator:
         self.master.rowconfigure(2, weight=5)
         self.master.rowconfigure(3, weight=1)
         self.master.columnconfigure(0, weight=1)
-        self.master.geometry("700x400")
+        self.master.geometry("700x600")
         self.master.resizable(False, False)
 
 
@@ -73,10 +73,41 @@ class QuoteGenerator:
         
         self.pricingTabControl = ttk.Notebook(self.add_on_frm)
 
-
+        #create self edge tab for add-on frame and non stock frame
         self.self_edge_tab = ttk.Frame(self.pricingTabControl)
+        self.self_edge_tab.rowconfigure(0,weight=2)
+        self.self_edge_tab.rowconfigure(1,weight=1)
+        self.self_edge_tab.columnconfigure(0,weight=1)
+
+        #add on frame
+        self.self_edge_add_on_frm = ttk.Frame(self.self_edge_tab,relief=tk.RAISED)
+        self.self_edge_add_on_frm.grid(row=0,column=0, sticky='nsew',pady=3,padx=2)
+        #non-stocked frame
+        self.self_edge_non_stocked_frm = ttk.Frame(self.self_edge_tab)
+        self.self_edge_non_stocked_frm.grid(row=1,column=0, sticky='nsew')
+
+        non_stock_lam_btn = ttk.Button(self.self_edge_non_stocked_frm,text='Add Non-Stocked Laminate Selection',).pack() 
+
+
+        #create stone tab for add-on frame and non-stocked frame 
         self.stone_tab = ttk.Frame(self.pricingTabControl)
-        self.pricingTabs = { 'Self Edge':self.self_edge_tab, 'Stone': self.stone_tab }
+        self.stone_tab.rowconfigure(0,weight=2)
+        self.stone_tab.rowconfigure(1,weight=1)
+        self.stone_tab.columnconfigure(0,weight=1)
+
+        #add on frame
+        self.stone_add_on_frm = ttk.Frame(self.stone_tab,relief=tk.RAISED)
+        self.stone_add_on_frm.grid(row=0,column=0, sticky='nsew',pady=3,padx=2)
+        #non-stocked frame
+        self.stone_non_stocked_frm = ttk.Frame(self.stone_tab)
+        self.stone_non_stocked_frm.grid(row=1,column=0, sticky='nsew')
+
+
+        non_stock_stone_btn = ttk.Button(self.stone_non_stocked_frm,text='Add Non-Stocked Stone Selection',command=self.add_non_stocked_stone_cmd).pack() 
+
+
+
+        self.pricingTabs = { 'Self Edge':self.self_edge_add_on_frm, 'Stone': self.stone_add_on_frm }
 
         self.pricingTabControl.bind("<ButtonRelease-1>", self.set_material)
 
@@ -90,9 +121,9 @@ class QuoteGenerator:
     
         self.pricingTabControl.pack(expand=1,fill= 'both')
 
-        self.load_add_on_frame(self.stone_tab,'Stone')
+        self.load_add_on_frame(self.stone_add_on_frm,'Stone')
 
-        self.load_add_on_frame(self.self_edge_tab,'Self Edge')
+        self.load_add_on_frame(self.self_edge_add_on_frm,'Self Edge')
         
 
         self.add_on_frm.grid(
@@ -127,6 +158,73 @@ class QuoteGenerator:
     #     self.main.root.destroy()
     #     self.master.destroy()
 
+
+
+    def add_non_stocked_stone_cmd(self):
+        ns_stone_data_json = r"jsons\non_stock_stone.json"
+        """This imports the pricing structures saved under 'data_json' and saves them as 'self.pricing_data' """
+        with open(ns_stone_data_json,"r") as ns_stone_info:
+            self.nonstocked_stone_data = json.load(ns_stone_info)
+
+
+
+            
+        self.non_stocked_stone_selector = tk.Toplevel()
+
+
+
+
+
+
+
+        self.ns_stone_brand_frm = tk.Frame(self.non_stocked_stone_selector)
+        self.ns_stone_brand_frm.pack()
+    
+
+
+        # Brand and Color Dropdown menu options
+        brand_options = [brand for brand in self.nonstocked_stone_data.keys()]
+        self.color_options = []
+        
+        # datatype of menu text
+        self.stone_brand = tk.StringVar()
+        # initial menu text
+        self.stone_brand.set( brand_options[0] )
+        
+        # Create Dropdown menu
+        brand_dropdown = tk.OptionMenu( self.ns_stone_brand_frm , self.stone_brand , *brand_options )
+        brand_dropdown.grid(row=0,column=0)
+
+
+
+
+
+
+
+
+
+        self.ns_stone_color_frm =  tk.Frame(self.non_stocked_stone_selector)
+        self.ns_stone_color_frm.pack()
+
+        self.ns_stone_color = tk.StringVar()
+        self.stone_brand.trace("w",lambda name,index,mode, brand = self.stone_brand:self.load_colors(brand))
+
+
+        color_dropdown = tk.OptionMenu( self.ns_stone_color_frm , self.ns_stone_color ,"i'm a formality", *self.color_options )
+        color_dropdown.grid(row=0,column=0)
+        self.load_colors(self.stone_brand)
+
+        # self.stone_brand.trace("w",)
+
+
+
+    def load_colors(self,brand):
+        #find brand in json and load names
+        brand = brand.get()
+        self.color_options = [color for color in self.nonstocked_stone_data[brand].keys()]
+        self.ns_stone_color.set(self.color_options[0])
+        print(brand)
+    
 
     def set_material(self,event):
         index = self.pricingTabControl.index('current')
@@ -456,9 +554,8 @@ class QuoteGenerator:
             if n >= half_point and n == x:
                 x = 0
                 z = 2
-            print(self.labels[material][n].cget("text"))
-            self.labels[material][n].grid(column=z, row=x)
-            entry_object.grid(column=z + 1, row=x)
+            self.labels[material][n].grid(column=z, row=x,pady = 3)
+            entry_object.grid(column=z + 1, row=x, pady = 3)
 
             x += 1
 

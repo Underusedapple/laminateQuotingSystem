@@ -1,0 +1,53 @@
+{
+    "Brand1": {
+        "Color1": {
+            "sqft_price": "Color 1",
+            "slab_height": 60.0,
+            "slab_width": 120
+        },
+        "Color2": {
+            "sqft_price": "Color 1",
+            "slab_height": 60.0,
+            "slab_width": 120
+        },
+        "Color3": {
+            "sqft_price": "Color 1",
+            "slab_height": 60.0,
+            "slab_width": 120
+        }
+    },
+    "Brand2": {
+        "Color4": {
+            "sqft_price": "Color 1",
+            "slab_height": 60.0,
+            "slab_width": 120
+        },
+        "Color5": {
+            "sqft_price": "Color 1",
+            "slab_height": 60.0,
+            "slab_width": 120
+        },
+        "Color6": {
+            "sqft_price": "Color 1",
+            "slab_height": 60.0,
+            "slab_width": 120
+        }
+    },
+    "Brand3": {
+        "Color7": {
+            "sqft_price": "Color 1",
+            "slab_height": 60.0,
+            "slab_width": 120
+        },
+        "Color8": {
+            "sqft_price": "Color 1",
+            "slab_height": 60.0,
+            "slab_width": 120
+        },
+        "Color9": {
+            "sqft_price": "Color 1",
+            "slab_height": 60.0,
+            "slab_width": 120
+        }
+    }
+}
