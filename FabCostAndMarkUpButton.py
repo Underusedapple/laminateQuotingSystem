@@ -5,12 +5,13 @@ from tkinter import messagebox
 
 # make buttons
 class Fab_Cost_Mark_Up_button(tk.Button):
-    def __init__(self, window, pricing_data, main, name="", *args, **kwargs):
+    def __init__(self, window, pricing_data,material, main, name="", *args, **kwargs):
         self.name = tk.StringVar()
         self.name.set(name.replace("_", " ").title())
         self.json_locator = name  # this is used to parse the json data for the "name" assigned for the button
         self.main = main  # this is main(self)
-        self.pricing_data = pricing_data
+        self.pricing_data = pricing_data[material]
+        self.material = material
 
         super().__init__(
             window, *args, textvariable=self.name, command=self.button_do, **kwargs
@@ -31,11 +32,11 @@ class Fab_Cost_Mark_Up_button(tk.Button):
 
         # update json (i currently have it rewriting all data just for simplicity, could only update the pricing data for effeciency)
         dumped_new_data = json.dumps(self.pricing_data, indent=4)
-        with open(self.main.data_json, "w") as pricing_data_json:
+        with open(self.main.data_jsons[self.material], "w") as pricing_data_json:
             pricing_data_json.write(dumped_new_data)
 
         # this is a verification that the password saved correctly
-        with open(self.main.data_json, "r") as pricing_data_json:
+        with open(self.main.data_jsons[self.material], "r") as pricing_data_json:
             pricing_data = json.load(pricing_data_json)
 
         if pricing_data[self.json_locator] == new_data:

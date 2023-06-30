@@ -6,12 +6,13 @@ import re
 
 # make buttons
 class Edge_and_Add_On_Button(tk.Button):
-    def __init__(self, window, pricing_data, main, name="", *args, **kwargs):
+    def __init__(self, window, pricing_data, material, main, name="", *args, **kwargs):
         self.name = tk.StringVar()
         self.name.set(name.replace("_", " ").title())
         self.json_locator = name  # this is used to parse the json data for the "name" assigned for the button
         self.main = main  # this is main(self)
-        self.pricing_data = pricing_data
+        self.pricing_data = pricing_data[material]
+        self.material = material
         super().__init__(
             window, *args, textvariable=self.name, command=self.button_do, **kwargs
         )
@@ -25,7 +26,6 @@ class Edge_and_Add_On_Button(tk.Button):
         # command for the submitbutton
 
         new_data = {}  # data stored in dictionary
-
         # loop through the buttons stored in lists using one list to iterate
         for x, txtbox_list in enumerate(self.name_tboxes):
             # get level name and remove white space
@@ -43,11 +43,11 @@ class Edge_and_Add_On_Button(tk.Button):
 
         # update json (i currently have it rewriting all data just for simplicity, could only update the pricing data for effeciency)
         dumped_new_data = json.dumps(self.pricing_data, indent=4)
-        with open(self.main.data_json, "w") as pricing_data_json:
+        with open(self.main.data_jsons[self.material], "w") as pricing_data_json:
             pricing_data_json.write(dumped_new_data)
 
         # this is a verification that the password saved correctly
-        with open(self.main.data_json, "r") as pricing_data_json:
+        with open(self.main.data_jsons[self.material], "r") as pricing_data_json:
             pricing_data = json.load(pricing_data_json)
 
         if pricing_data[self.json_locator] == new_data:
@@ -56,16 +56,20 @@ class Edge_and_Add_On_Button(tk.Button):
             messagebox.showinfo(
                 "Saving Error", "Unable to save data. Please try again."
             )
-        self.main.edit_info_btn_page.deiconify()
 
 
-        for widget in self.main.add_on_frm.winfo_children(): #clear widgets from add_on_frame
+        #below is unique to this button as the add-on tab needs to be reloaded in case of added parameters
+        tab = self.main.pricingTabs[self.material]
+        
+        self.main.edit_info_btn_page.deiconify()#TODO: I think this is wrong
+
+        for widget in tab.winfo_children(): #clear widgets from add_on_frame
             widget.destroy()
 
 
 
         
-        self.main.load_add_on_frame() #reload the add-on frame as there are new objects that need to be caught
+        self.main.load_add_on_frame(tab,self.material) #reload the add-on frame as there are new objects that need to be caught
 
 
 
@@ -154,7 +158,7 @@ class Edge_and_Add_On_Button(tk.Button):
 
     def button_do(self):
         # hide edit info buttons
-        # self.main.edit_info_btn_page.withdraw()
+        self.main.edit_info_btn_page.withdraw()
         # pull levels from pricing data
 
         json_data = self.pricing_data[self.json_locator]

@@ -91,5 +91,75 @@
         "upgrade_18ga_sink": 240.0,
         "porcelain_vanity_sink": 45.0,
         "customer_sink": 100.0
+    },
+    "lam_levels": {
+        "Self Edge_0": {
+            "Name": "Granite Level 1",
+            "Color": [
+                "Azul Platino",
+                "SF Real",
+                "Caledonia",
+                "Luna Pearl"
+            ],
+            "Price": 7.5
+        },
+        "Self Edge_1": {
+            "Name": "Granite Level 2",
+            "Color": [
+                "Fantasy Brown",
+                "Gray Mist",
+                "Santa Cecilia",
+                "New Venetian Gold"
+            ],
+            "Price": 10.0
+        },
+        "Self Edge_2": {
+            "Name": "Granite Level 3",
+            "Color": [
+                "Nero Mist Honed",
+                "Salinas White",
+                "Steel Grey Polished",
+                "Steel Grey Brushed"
+            ],
+            "Price": 12.0
+        },
+        "Self Edge_3": {
+            "Name": "Quartz Level 1",
+            "Color": [
+                "Frost White",
+                "Iced White",
+                "Peppercorn White"
+            ],
+            "Price": 17.0
+        },
+        "Self Edge_4": {
+            "Name": "Quartz Level 2",
+            "Color": [
+                "Carrara Grigio",
+                "Carrara Mist",
+                "Fossil Gray"
+            ],
+            "Price": 22.5
+        },
+        "Self Edge_5": {
+            "Name": "Quartz Level 3",
+            "Color": [
+                "Babylon Gray",
+                "Calacatta Classique",
+                "Calacatta Vicenza",
+                "Gray Lagoon"
+            ],
+            "Price": 25.5
+        },
+        "Self Edge_6": {
+            "Name": "Quartz Level 4",
+            "Color": [
+                "Calacatta Miraggio",
+                "Calacatta Miraggio Cielo",
+                "Calacatta Miraggio Duo",
+                "Calacatta Miraggio Gold"
+            ],
+            "Price": 32.0
+        }
     }
 }

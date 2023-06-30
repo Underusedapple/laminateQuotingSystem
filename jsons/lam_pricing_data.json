@@ -1,6 +1,6 @@
 {
     "lam_levels": {
-        "Self Edge_0": {
+        "SelfEdge_0": {
             "Name": "Formica -58 Finish",
             "Color": [
                 "3496 Belmonte Granite",
@@ -19,7 +19,7 @@
             ],
             "Price": 10.0
         },
-        "Self Edge_1": {
+        "SelfEdge_1": {
             "Name": "Wilsonart -38 or -60 Finish",
             "Color": [
                 "4551 Blackstar Granite",
@@ -28,14 +28,14 @@
             ],
             "Price": 10.75
         },
-        "Self Edge_2": {
+        "SelfEdge_2": {
             "Name": "Formica Upgrade Finish",
             "Color": [
                 "9277-46 Ouro Romano"
             ],
             "Price": 11.25
         },
-        "Self Edge_3": {
+        "SelfEdge_3": {
             "Name": "Formica 180fx Finish",
             "Color": [
                 "3460 Calacatta Marble"
@@ -45,31 +45,31 @@
     },
     "edge_pricing": {
         "bevel_edge": 21.0,
-        "crescent_edge_(wilsonart_only)": 32.0,
-        "ideal_edge_(formica_only)": 32.0
+        "crescent_edge_(wilsonart_only)": 25.0,
+        "ideal_edge_(formica_only)": 25.0
     },
     "add_ons": {
         "screw-on_sqft": 4.0,
-        "end_splash": 11.0,
-        "laminate_seam": 11.0,
-        "clipped_corner_or_radius": 12.5,
-        "standard_cutout": 11.0,
-        "non_standard_cutout": 25.0,
-        "splay_or_bumpout": 30.0,
-        "arc": 30.0,
-        "slide-in_range": 30.0,
-        "field_joint": 45.0,
-        "sealed_seam": 45.0,
-        "builder_grade_25_x_22_single_bowl": 100.0,
-        "builder_grade_33_x_22_5050_double_bowl": 105.0,
-        "builder_grade_15_x_15_2_hole_bar_sink": 100.0,
-        "upgrade_25_x_22_x_8_20_ga_single_bowl": 155.0,
-        "upgrade_33_x_22_x_8_20_ga_5050_double_bowl": 180.0,
-        "builder_grade_ada_25_x_22_single_bowl": 185.0,
-        "upgrade_ada_25_x_21_20_ga_single_bowl": 310.0,
-        "field_measuring": 100.0,
-        "laser_templating": 200.0,
-        "trip_charge": 100.0,
-        "site_delivery": 125.0
+        "end_splash": 22.0,
+        "laminate_seam": 22.0,
+        "clipped_corner_or_radius": 25.0,
+        "standard_cutout": 22.0,
+        "non_standard_cutout": 45.0,
+        "splay_or_bumpout": 60.0,
+        "arc": 60.0,
+        "slide-in_range": 60.0,
+        "field_joint": 90.0,
+        "sealed_seam": 90.0,
+        "builder_grade_25_x_22_single_bowl": 195.0,
+        "builder_grade_33_x_22_5050_double_bowl": 210.0,
+        "builder_grade_15_x_15_2_hole_bar_sink": 195.0,
+        "upgrade_25_x_22_x_8_20_ga_single_bowl": 310.0,
+        "upgrade_33_x_22_x_8_20_ga_5050_double_bowl": 360.0,
+        "builder_grade_ada_25_x_22_single_bowl": 365.0,
+        "upgrade_ada_25_x_21_20_ga_single_bowl": 625.0,
+        "field_measuring": 200.0,
+        "laser_templating": 400.0,
+        "trip_charge": 200.0,
+        "site_delivery": 250.0
     }
 }

@@ -76,12 +76,10 @@ class QuoteGenerator:
 
         self.self_edge_tab = ttk.Frame(self.pricingTabControl)
         self.stone_tab = ttk.Frame(self.pricingTabControl)
-        self.pricingTabs = {self.self_edge_tab: 'Self Edge',self.stone_tab : 'Stone'}
+        self.pricingTabs = { 'Self Edge':self.self_edge_tab, 'Stone': self.stone_tab }
 
-        print(self.pricingTabs[self.self_edge_tab])
         self.pricingTabControl.bind("<ButtonRelease-1>", self.set_material)
-        # for tab in self.pricingTabs.keys():
-        #     tab.bind('<Button-1>', lambda event,material = self.pricingTabs[tab]:self.set_material(material))#
+
 
 
         
@@ -89,6 +87,7 @@ class QuoteGenerator:
 
         self.pricingTabControl.add(self.self_edge_tab,text= "Self-Edge")
         self.pricingTabControl.add(self.stone_tab,text= "Stone")
+    
         self.pricingTabControl.pack(expand=1,fill= 'both')
 
         self.load_add_on_frame(self.stone_tab,'Stone')
@@ -128,6 +127,7 @@ class QuoteGenerator:
     #     self.main.root.destroy()
     #     self.master.destroy()
 
+
     def set_material(self,event):
         index = self.pricingTabControl.index('current')
         if index == 0:
@@ -135,15 +135,20 @@ class QuoteGenerator:
         elif index == 1:
             self.material = 'Stone'
         print(self.material)
+
+
+
+
     def import_pricing_data(self):
         self_edge_data_json = r"jsons\lam_pricing_data.json"
         stone_data_json = r"jsons\stone_pricing_data.json"
+        self.data_jsons = {'Self Edge': self_edge_data_json, 'Stone': stone_data_json}
         self.pricing_data = {}
         """This imports the pricing structures saved under 'data_json' and saves them as 'self.pricing_data' """
-        with open(self_edge_data_json,"r") as pricing_data:
-            self.pricing_data['Self Edge'] = json.load(pricing_data)
-        with open(stone_data_json,"r") as pricing_data:
-            self.pricing_data['Stone'] = json.load(pricing_data)
+        with open(self_edge_data_json,"r") as se_pricing_data:
+            self.pricing_data['Self Edge'] = json.load(se_pricing_data)
+        with open(stone_data_json,"r") as stone_pricing_data:
+            self.pricing_data['Stone'] = json.load(stone_pricing_data)
     def lam_quote(self,sqft,multiplier):
         
 
@@ -423,8 +428,10 @@ class QuoteGenerator:
         for x in range(4):
             tab.columnconfigure(x, weight=1)
 
-
-
+        #reload entries and labels if there are already entries
+        if len(self.entries[material]) != 0 or len(self.labels[material]) != 0:
+            self.entries[material] = []
+            self.labels[material] = []
         # create entries and labels and add to lists
         for data in add_on_data:
             new_entry = tk.Entry(
@@ -449,6 +456,7 @@ class QuoteGenerator:
             if n >= half_point and n == x:
                 x = 0
                 z = 2
+            print(self.labels[material][n].cget("text"))
             self.labels[material][n].grid(column=z, row=x)
             entry_object.grid(column=z + 1, row=x)
 
@@ -534,7 +542,7 @@ class QuoteGenerator:
         self.advanced_window.rowconfigure(1,weight=1,pad=10)
         self.advanced_window.columnconfigure(0,weight=1,pad=10)
         edit_price_btn = tk.Button(
-            self.advanced_window, text="Edit Pricing", command=self.open_info_edit
+            self.advanced_window, text="Edit Pricing", command=self.select_material_to_edit
         ).grid(column=0,row=0, sticky='nsew', padx=5, pady=3)
         chnge_pssword_btn = tk.Button(
             self.advanced_window, text="Change Password", command=self.change_password_cmd
@@ -637,11 +645,30 @@ class QuoteGenerator:
             self.edit_pswrd_frame, text="Cancel", command=cancel_button
         ).grid(row=3, column=1)
 
-    def open_info_edit(self):
-        """Opens window to buttons that updates pricing structure """
-        self.import_pricing_data()
 
+
+    def select_material_to_edit(self):
         self.advanced_window.destroy()
+        self.import_pricing_data()
+        self.material_price_select_frm = tk.Toplevel()
+        
+        for n,material in enumerate(self.pricing_data):
+            self.material_price_select_frm.rowconfigure(n, weight=1)
+            btn = tk.Button(self.material_price_select_frm, text=material, command= lambda material = material: self.open_info_edit(material))
+            btn.grid(row=n,column=0, sticky ='nsew',padx = 5, pady = 1.5)
+
+        
+
+        
+
+
+    def open_info_edit(self,material):
+        """Opens window to buttons that updates pricing structure """
+        self.material_price_select_frm.destroy()
+        
+
+
+
         # window no frame
         self.edit_info_btn_page = tk.Toplevel()
         self.edit_info_btn_page.resizable(False,False)
@@ -654,13 +681,13 @@ class QuoteGenerator:
         # lsit of buttons for later?
         btns = []
 
-        if self.material == 'Self Edge':
+        if material == 'Self Edge':
             button_organizer = [
                     Material_Level_Button,
                     Edge_and_Add_On_Button,
                     Edge_and_Add_On_Button
                 ]
-        elif self.material == 'Stone':
+        elif material == 'Stone':
 
             button_organizer = [
                     Fab_Cost_Mark_Up_button,
@@ -670,12 +697,12 @@ class QuoteGenerator:
                     Edge_and_Add_On_Button
                 ]
         # make and add buttons to list
-        for z, data in enumerate(self.pricing_data):
+        for z, data in enumerate(self.pricing_data[material]):
 
             crnt_btn = button_organizer[z]
 
             btns.append(crnt_btn(
-                    self.edit_info_btn_page, self.pricing_data, self, data
+                    self.edit_info_btn_page, self.pricing_data,material, self, data
                 ))
 
         # pack buttons onto window
@@ -693,7 +720,7 @@ class QuoteGenerator:
                 rw = n
             
             
-            btn.grid(row=rw, column=col, sticky ='nsew',padx = 5, pady = 1.5,)
+            btn.grid(row=rw, column=col, sticky ='nsew',padx = 5, pady = 1.5)
 
 
 
