@@ -55,9 +55,9 @@ class Material_Level_Button(tk.Button):
             }
 
         # update pricing data
-        if self.main.material == 'Stone':
+        if self.material == 'Stone':
             levels = 'stone_levels'
-        elif self.main.material == 'Self Edge':
+        elif self.material == 'Self Edge':
             levels = 'lam_levels'
         self.pricing_data[levels] = new_data
 

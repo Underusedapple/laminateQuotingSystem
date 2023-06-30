@@ -1,6 +1,6 @@
 {
     "lam_levels": {
-        "SelfEdge_0": {
+        "Self Edge_0": {
             "Name": "Formica -58 Finish",
             "Color": [
                 "3496 Belmonte Granite",
@@ -19,7 +19,7 @@
             ],
             "Price": 10.0
         },
-        "SelfEdge_1": {
+        "Self Edge_1": {
             "Name": "Wilsonart -38 or -60 Finish",
             "Color": [
                 "4551 Blackstar Granite",
@@ -28,14 +28,14 @@
             ],
             "Price": 10.75
         },
-        "SelfEdge_2": {
+        "Self Edge_2": {
             "Name": "Formica Upgrade Finish",
             "Color": [
                 "9277-46 Ouro Romano"
             ],
             "Price": 11.25
         },
-        "SelfEdge_3": {
+        "Self Edge_3": {
             "Name": "Formica 180fx Finish",
             "Color": [
                 "3460 Calacatta Marble"

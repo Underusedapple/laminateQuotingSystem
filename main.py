@@ -651,10 +651,11 @@ class QuoteGenerator:
         self.advanced_window.destroy()
         self.import_pricing_data()
         self.material_price_select_frm = tk.Toplevel()
-        
+        self.material_price_select_frm.resizable(False,False)
+        self.material_price_select_frm.columnconfigure(0,weight=1)
         for n,material in enumerate(self.pricing_data):
             self.material_price_select_frm.rowconfigure(n, weight=1)
-            btn = tk.Button(self.material_price_select_frm, text=material, command= lambda material = material: self.open_info_edit(material))
+            btn = tk.Button(self.material_price_select_frm, text=material, command= lambda material = material: self.open_info_edit(material),height=2,width=15)
             btn.grid(row=n,column=0, sticky ='nsew',padx = 5, pady = 1.5)
 
         
