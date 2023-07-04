@@ -248,27 +248,28 @@ class QuoteGenerator:
             self.ns_stone_submit_btn.config(state=tk.DISABLED)
 
     def submit_ns_stone(self):
-        print('I work')
-        ns_selection = f'{self.ns_stone_brand.get()}: {self.ns_stone_color.get()}'
-        if ns_selection in self.ns_stone_lbls_dict:
-            print('raise error for selection already made') #TODO: This
-            return
-        ns_selection_frm = tk.Frame(self.stone_non_stocked_frm)
-        ns_selection_frm.pack()
-        ns_stone_lbl = tk.Label(ns_selection_frm, text = ns_selection)
-        ns_stone_lbl.pack(side=tk.LEFT)
-
-
-        ns_stone_delete_btn = tk.Button(ns_selection_frm,text='X', command= lambda selection = ns_selection: self.delete_ns_stone_row(selection))
-
+        brand,color = self.ns_stone_brand.get(),self.ns_stone_color.get()
+        price = self.nonstocked_stone_data[brand][color]['sqft_price']
+        ns_selection = [brand, color,price]
+        ns_selection_key = ": ".join(ns_selection[0:2])
+        if ns_selection_key not in self.ns_stone_lbls_dict:
         
-        ns_stone_delete_btn.pack(side=tk.RIGHT)
-        self.ns_stone_lbls_dict[ns_selection] = ns_selection_frm
+            ns_selection_frm = tk.Frame(self.stone_non_stocked_frm)
+            ns_selection_frm.pack()
+            ns_stone_lbl = tk.Label(ns_selection_frm, text = ns_selection_key)
+            ns_stone_lbl.pack(side=tk.LEFT)
 
+
+            ns_stone_delete_btn = tk.Button(ns_selection_frm,text='X', command= lambda selection = ns_selection_key: self.delete_ns_stone_row(selection))
+
+            
+            ns_stone_delete_btn.pack(side=tk.RIGHT)
+            self.ns_stone_lbls_dict[ns_selection_key] = ns_selection_frm
+        else:
+            print('raise error for selection already made') #TODO: This
 
 
     def delete_ns_stone_row(self,selection):
-        print(selection)
         print(self.ns_stone_lbls_dict)
         self.ns_stone_lbls_dict[selection].destroy()
         self.ns_stone_lbls_dict.pop(selection)
@@ -369,22 +370,28 @@ class QuoteGenerator:
             self.ns_lam_submit_btn.config(state=tk.DISABLED)
 
     def submit_ns_lam(self):
-        print('I work')
-        ns_selection = f'{self.ns_lam_brand.get()}: {self.ns_lam_color.get()}'
-        if ns_selection in self.ns_lam_lbls_dict:
+        brand,color = self.ns_lam_brand.get(),self.ns_lam_color.get()
+        price = self.nonstocked_lam_data[brand][color]['sqft_price']
+        ns_selection = [brand, color,price]
+        ns_selection_key = ": ".join(ns_selection[0:2])
+
+
+
+        if ns_selection_key not in self.ns_lam_lbls_dict:
+      
+            ns_selection_frm = tk.Frame(self.lam_non_stocked_frm)
+            ns_selection_frm.pack()
+            ns_lam_lbl = tk.Label(ns_selection_frm, text = ns_selection_key)
+            ns_lam_lbl.pack(side=tk.LEFT)
+
+
+            ns_lam_delete_btn = tk.Button(ns_selection_frm,text='X', command= lambda selection = ns_selection: self.delete_ns_lam_row(selection))
+
+            
+            ns_lam_delete_btn.pack(side=tk.RIGHT)
+            self.ns_lam_lbls_dict[ns_selection_key] = ns_selection_frm 
+        else:#hello working on using the dicitonary to add to stone or laminate fucnation cause it nwo has the pricing too, add it to the pricing_levels  at other hello
             print('raise error for selection already made') #TODO: This
-            return
-        ns_selection_frm = tk.Frame(self.lam_non_stocked_frm)
-        ns_selection_frm.pack()
-        ns_lam_lbl = tk.Label(ns_selection_frm, text = ns_selection)
-        ns_lam_lbl.pack(side=tk.LEFT)
-
-
-        ns_lam_delete_btn = tk.Button(ns_selection_frm,text='X', command= lambda selection = ns_selection: self.delete_ns_lam_row(selection))
-
-        
-        ns_lam_delete_btn.pack(side=tk.RIGHT)
-        self.ns_lam_lbls_dict[ns_selection] = ns_selection_frm
 
     def delete_ns_lam_row(self,selection):
         print(selection)
@@ -483,7 +490,6 @@ class QuoteGenerator:
         # info for pricing structures on stones
 
         stone_levels = self.pricing_data['Stone']["stone_levels"]
-
         # pricing on add-ons
         add_ons = self.pricing_data['Stone']["add_ons"]
 
@@ -566,8 +572,9 @@ class QuoteGenerator:
         if self.material == 'Self Edge':
             if self.ns_stone_lbls_dict:
                 for lbl in self.ns_stone_lbls_dict:
+                    pass
                     #TODO: stuff here to add info to the pricing levels dictionary
-        if self.
+        # if self.
 
 
 
