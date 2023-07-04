@@ -28,6 +28,11 @@ class QuoteGenerator:
         self.import_pricing_data()  # pull pricing data
         
         self.material = 'Self Edge'
+        self.ns_stone_lbls_dict = {}
+        self.ns_lam_lbls_dict = {}
+        self.color_selection_default = 'No selection made'
+
+
         
         # lists of entries and labels for later use
         self.entries = {'Self Edge':[],'Stone':[]}
@@ -83,10 +88,10 @@ class QuoteGenerator:
         self.self_edge_add_on_frm = ttk.Frame(self.self_edge_tab,relief=tk.RAISED)
         self.self_edge_add_on_frm.grid(row=0,column=0, sticky='nsew',pady=3,padx=2)
         #non-stocked frame
-        self.self_edge_non_stocked_frm = ttk.Frame(self.self_edge_tab)
-        self.self_edge_non_stocked_frm.grid(row=1,column=0, sticky='nsew')
+        self.lam_non_stocked_frm = ttk.Frame(self.self_edge_tab)
+        self.lam_non_stocked_frm.grid(row=1,column=0, sticky='nsew')
 
-        non_stock_lam_btn = ttk.Button(self.self_edge_non_stocked_frm,text='Add Non-Stocked Laminate Selection',).pack() 
+        non_stock_lam_btn = ttk.Button(self.lam_non_stocked_frm,text='Add Non-Stocked Laminate Selection',command=self.add_non_stocked_lam_cmd).pack() 
 
 
         #create stone tab for add-on frame and non-stocked frame 
@@ -163,12 +168,15 @@ class QuoteGenerator:
     def add_non_stocked_stone_cmd(self):
         ns_stone_data_json = r"jsons\non_stock_stone.json"
         """This imports the pricing structures saved under 'data_json' and saves them as 'self.pricing_data' """
+
+
+        #load non-stocked stone data
         with open(ns_stone_data_json,"r") as ns_stone_info:
             self.nonstocked_stone_data = json.load(ns_stone_info)
 
 
 
-            
+        #create window
         self.non_stocked_stone_selector = tk.Toplevel()
 
 
@@ -176,7 +184,7 @@ class QuoteGenerator:
 
 
 
-
+        #add a frame
         self.ns_stone_brand_frm = tk.Frame(self.non_stocked_stone_selector)
         self.ns_stone_brand_frm.pack()
     
@@ -184,15 +192,15 @@ class QuoteGenerator:
 
         # Brand and Color Dropdown menu options
         brand_options = [brand for brand in self.nonstocked_stone_data.keys()]
-        self.color_options = []
+        self.color_options = []#this is filled in later
         
-        # datatype of menu text
-        self.stone_brand = tk.StringVar()
+        #object for menu text
+        self.ns_stone_brand = tk.StringVar()
         # initial menu text
-        self.stone_brand.set( brand_options[0] )
+        self.ns_stone_brand.set(self.color_selection_default)
         
         # Create Dropdown menu
-        brand_dropdown = tk.OptionMenu( self.ns_stone_brand_frm , self.stone_brand , *brand_options )
+        brand_dropdown = tk.OptionMenu( self.ns_stone_brand_frm , self.ns_stone_brand , *brand_options )
         brand_dropdown.grid(row=0,column=0)
 
 
@@ -207,24 +215,201 @@ class QuoteGenerator:
         self.ns_stone_color_frm.pack()
 
         self.ns_stone_color = tk.StringVar()
-        self.stone_brand.trace("w",lambda name,index,mode, brand = self.stone_brand:self.load_colors(brand))
+
+        self.color_dropdown = tk.OptionMenu( self.ns_stone_color_frm , self.ns_stone_color ,self.color_selection_default, *self.color_options )
+        self.color_dropdown.grid(row=0,column=0)
+        self.ns_stone_color.set(self.color_selection_default)
+
+        self.ns_stone_selection_confirm_frm = tk.Frame(self.non_stocked_stone_selector)
+        self.ns_stone_selection_confirm_frm.pack()
+
+        self.ns_stone_selection_lbl = tk.Label(self.ns_stone_selection_confirm_frm, text='No selection made')
+        self.ns_stone_selection_lbl.pack()
 
 
-        color_dropdown = tk.OptionMenu( self.ns_stone_color_frm , self.ns_stone_color ,"i'm a formality", *self.color_options )
-        color_dropdown.grid(row=0,column=0)
-        self.load_colors(self.stone_brand)
+        self.ns_stone_button_frm = tk.Frame(self.non_stocked_stone_selector)
+        self.ns_stone_button_frm.pack()
 
-        # self.stone_brand.trace("w",)
+        self.ns_stone_submit_btn = tk.Button(self.ns_stone_button_frm, text='Submit', command=self.submit_ns_stone, state=tk.DISABLED)
+        self.ns_stone_submit_btn.pack()
 
 
 
-    def load_colors(self,brand):
+        self.ns_stone_brand.trace("w",lambda name,index,mode, brand = self.ns_stone_brand:self.load_stone_colors(brand))
+
+        self.ns_stone_color.trace("w",lambda name,index,mode: self.load_ns_stone_selection())
+
+        
+
+    def check_ns_stone_label(self,):
+        if self.color_selection_default not in self.ns_stone_selection_lbl.cget('text'):
+            self.ns_stone_submit_btn.config(state=tk.ACTIVE)
+        else:
+            self.ns_stone_submit_btn.config(state=tk.DISABLED)
+
+    def submit_ns_stone(self):
+        print('I work')
+        ns_selection = f'{self.ns_stone_brand.get()}: {self.ns_stone_color.get()}'
+        if ns_selection in self.ns_stone_lbls_dict:
+            print('raise error for selection already made') #TODO: This
+            return
+        ns_selection_frm = tk.Frame(self.stone_non_stocked_frm)
+        ns_selection_frm.pack()
+        ns_stone_lbl = tk.Label(ns_selection_frm, text = ns_selection)
+        ns_stone_lbl.pack(side=tk.LEFT)
+
+
+        ns_stone_delete_btn = tk.Button(ns_selection_frm,text='X', command= lambda selection = ns_selection: self.delete_ns_stone_row(selection))
+
+        
+        ns_stone_delete_btn.pack(side=tk.RIGHT)
+        self.ns_stone_lbls_dict[ns_selection] = ns_selection_frm
+
+
+
+    def delete_ns_stone_row(self,selection):
+        print(selection)
+        print(self.ns_stone_lbls_dict)
+        self.ns_stone_lbls_dict[selection].destroy()
+        self.ns_stone_lbls_dict.pop(selection)
+        print(self.ns_stone_lbls_dict)
+
+        pass
+
+    def load_stone_colors(self,brand):
         #find brand in json and load names
         brand = brand.get()
+
         self.color_options = [color for color in self.nonstocked_stone_data[brand].keys()]
-        self.ns_stone_color.set(self.color_options[0])
+        self.color_dropdown['menu'].delete(0, 'end')
+        for option in self.color_options:
+            self.color_dropdown['menu'].add_command(label=option, command=tk._setit(self.ns_stone_color, option))
+
+        self.ns_stone_color.set(self.color_selection_default)
         print(brand)
+
+    def load_ns_stone_selection(self):
+        self.ns_stone_selection_lbl.config(text=f'{self.ns_stone_brand.get()}: {self.ns_stone_color.get()}')
+
+        self.check_ns_stone_label()
+
+
+    def add_non_stocked_lam_cmd(self):
+        ns_lam_data_json = r"jsons\non_stock_stone.json"
+        """This imports the pricing structures saved under 'data_json' and saves them as 'self.pricing_data' """
+
+
+        #load non-stocked lam data
+        with open(ns_lam_data_json,"r") as ns_lam_info:
+            self.nonstocked_lam_data = json.load(ns_lam_info)
+
+
+
+        #create window
+        self.non_stocked_lam_selector = tk.Toplevel()
+
+
+
+        #add a frame
+        self.ns_lam_brand_frm = tk.Frame(self.non_stocked_lam_selector)
+        self.ns_lam_brand_frm.pack()
     
+
+
+        # Brand and Color Dropdown menu options
+        brand_options = [brand for brand in self.nonstocked_lam_data.keys()]
+        self.color_options = []#this is filled in later
+        
+        #object for menu text
+        self.ns_lam_brand = tk.StringVar()
+        # initial menu text
+        self.ns_lam_brand.set(self.color_selection_default)
+        
+        # Create Dropdown menu
+        brand_dropdown = tk.OptionMenu( self.ns_lam_brand_frm , self.ns_lam_brand , *brand_options )
+        brand_dropdown.grid(row=0,column=0)
+
+
+
+
+        self.ns_lam_color_frm =  tk.Frame(self.non_stocked_lam_selector)
+        self.ns_lam_color_frm.pack()
+
+        self.ns_lam_color = tk.StringVar()
+
+        self.color_dropdown = tk.OptionMenu( self.ns_lam_color_frm , self.ns_lam_color ,self.color_selection_default, *self.color_options )
+        self.color_dropdown.grid(row=0,column=0)
+        self.ns_lam_color.set(self.color_selection_default)
+
+        self.ns_lam_selection_confirm_frm = tk.Frame(self.non_stocked_lam_selector)
+        self.ns_lam_selection_confirm_frm.pack()
+
+        self.ns_lam_selection_lbl = tk.Label(self.ns_lam_selection_confirm_frm, text='No selection made')
+        self.ns_lam_selection_lbl.pack()
+
+
+        self.ns_lam_button_frm = tk.Frame(self.non_stocked_lam_selector)
+        self.ns_lam_button_frm.pack()
+
+        self.ns_lam_submit_btn = tk.Button(self.ns_lam_button_frm, text='Submit', command=self.submit_ns_lam, state=tk.DISABLED)
+        self.ns_lam_submit_btn.pack()
+
+
+
+        self.ns_lam_brand.trace("w",lambda name,index,mode, brand = self.ns_lam_brand:self.load_lam_colors(brand))
+
+        self.ns_lam_color.trace("w",lambda name,index,mode: self.load_ns_lam_selection())
+
+        
+
+    def check_ns_lam_label(self,):
+        if self.color_selection_default not in self.ns_lam_selection_lbl.cget('text'):
+            self.ns_lam_submit_btn.config(state=tk.ACTIVE)
+        else:
+            self.ns_lam_submit_btn.config(state=tk.DISABLED)
+
+    def submit_ns_lam(self):
+        print('I work')
+        ns_selection = f'{self.ns_lam_brand.get()}: {self.ns_lam_color.get()}'
+        if ns_selection in self.ns_lam_lbls_dict:
+            print('raise error for selection already made') #TODO: This
+            return
+        ns_selection_frm = tk.Frame(self.lam_non_stocked_frm)
+        ns_selection_frm.pack()
+        ns_lam_lbl = tk.Label(ns_selection_frm, text = ns_selection)
+        ns_lam_lbl.pack(side=tk.LEFT)
+
+
+        ns_lam_delete_btn = tk.Button(ns_selection_frm,text='X', command= lambda selection = ns_selection: self.delete_ns_lam_row(selection))
+
+        
+        ns_lam_delete_btn.pack(side=tk.RIGHT)
+        self.ns_lam_lbls_dict[ns_selection] = ns_selection_frm
+
+    def delete_ns_lam_row(self,selection):
+        print(selection)
+        print(self.ns_lam_lbls_dict)
+        self.ns_lam_lbls_dict[selection].destroy()
+        self.ns_lam_lbls_dict.pop(selection)
+        print(self.ns_lam_lbls_dict)
+        pass
+
+    def load_lam_colors(self,brand):
+        #find brand in json and load names
+        brand = brand.get()
+
+        self.color_options = [color for color in self.nonstocked_lam_data[brand].keys()]
+        self.color_dropdown['menu'].delete(0, 'end')
+        for option in self.color_options:
+            self.color_dropdown['menu'].add_command(label=option, command=tk._setit(self.ns_lam_color, option))
+
+        self.ns_lam_color.set(self.color_selection_default)
+        print(brand)
+
+    def load_ns_lam_selection(self):
+        self.ns_lam_selection_lbl.config(text=f'{self.ns_lam_brand.get()}: {self.ns_lam_color.get()}')
+
+        self.check_ns_lam_label()
 
     def set_material(self,event):
         index = self.pricingTabControl.index('current')
@@ -233,9 +418,6 @@ class QuoteGenerator:
         elif index == 1:
             self.material = 'Stone'
         print(self.material)
-
-
-
 
     def import_pricing_data(self):
         self_edge_data_json = r"jsons\lam_pricing_data.json"
@@ -247,6 +429,7 @@ class QuoteGenerator:
             self.pricing_data['Self Edge'] = json.load(se_pricing_data)
         with open(stone_data_json,"r") as stone_pricing_data:
             self.pricing_data['Stone'] = json.load(stone_pricing_data)
+
     def lam_quote(self,sqft,multiplier):
         
 
@@ -350,9 +533,8 @@ class QuoteGenerator:
         elif self.material == 'Stone':
             edge_pricing = self.pricing_data['Stone']["edge_pricing"]
 
-        print(edge_pricing)
-
-
+        
+        
         # get the sqft from the pdf data
 
         sqft = self.jobData["Total Area"]
@@ -378,7 +560,16 @@ class QuoteGenerator:
         elif self.material == 'Stone':
             for edge in upgrade_edge_pricing:
                 upgrade_edge_pricing[edge] = math.ceil(upgrade_edge_pricing[edge] * 2 * multiplier)
-                
+        
+        
+        print(pricing_levels)      
+        if self.material == 'Self Edge':
+            if self.ns_stone_lbls_dict:
+                for lbl in self.ns_stone_lbls_dict:
+                    #TODO: stuff here to add info to the pricing levels dictionary
+        if self.
+
+
 
         createQuoteFromData(self.jobData,pricing_levels,upgrade_edge_pricing,self.folderpath,self.filepath,self.add_on_quants,self.material)
 

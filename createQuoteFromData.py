@@ -129,7 +129,7 @@ def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_path, 
     #commit to table
     edge_options.append(easedEdgeRow)
 
-
+    edging_info = {'Edge Name': edging_name}
     
     for option in edging_dict:
 
