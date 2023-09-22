@@ -1,0 +1,48 @@
+{
+    "Formica": {
+        "Level1": {
+            "Name": "Formica -58 Finish",
+            "Color": [
+                "3496 Belmonte Granite",
+                "3522 Perlato Granite",
+                "3690 Basalt Slate",
+                "3692 Labrador Granite",
+                "6222 Brazilian Brown Granite",
+                "6223 Venetian Gold Granite",
+                "6696 Carrara Bianco",
+                "6697 Argento Romano",
+                "7022 Natural Canvas",
+                "7494 Carrara Envision",
+                "7732 Butterum Granite",
+                "7734 Jamocha Granite",
+                "9497 Silver Quartzite"
+            ],
+            "Price": 10.0
+        },
+        "Level2": {
+            "Name": "Formica Upgrade Finish",
+            "Color": [
+                "9277-46 Ouro Romano"
+            ],
+            "Price": 11.25
+        },
+        "Level3": {
+            "Name": "Formica 180fx Finish",
+            "Color": [
+                "3460 Calacatta Marble"
+            ],
+            "Price": 12.0
+        }
+    },
+    "Wilsonart" : {
+        "Level1": {
+            "Name": "Wilsonart -38 or -60 Finish",
+            "Color": [
+                "4551 Blackstar Granite",
+                "4623 Graphite Nebula",
+                "4924 White Carrara"
+            ],
+            "Price": 10.75
+        }
+    }
+}

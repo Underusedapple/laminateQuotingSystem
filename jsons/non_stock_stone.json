@@ -1,53 +1,55 @@
 {
-    "Brand1": {
-        "Color1": {
-            "sqft_price": 100,
-            "slab_height": 60.0,
-            "slab_width": 120
+    "MSI": {
+        "Absolute Black": {
+            "Size": {
+                "Height":60,
+                "Width": 130
+
+            },
+            "Price": 30.0
         },
-        "Color2": {
-            "sqft_price": 100,
-            "slab_height": 60.0,
-            "slab_width": 120
+        "Virginia Mist": {
+            "Size": {
+                "Height":60,
+                "Width": 130
+
+            },
+            "Price": 35.0
         },
-        "Color3": {
-            "sqft_price": 100,
-            "slab_height": 60.0,
-            "slab_width": 120
+        "Fantasy Black": {
+            "Size": {
+                "Height":60,
+                "Width": 130
+
+            },
+            "Price": 30.0
         }
     },
-    "Brand2": {
-        "Color4": {
-            "sqft_price": 100,
-            "slab_height": 60.0,
-            "slab_width": 120
+    "Q Quartz" : {
+        "Quartz 1": {
+            "Size": {
+                "Height":60,
+                "Width": 130
+
+            },
+            "Price": 30.0
         },
-        "Color5": {
-            "sqft_price": 100,
-            "slab_height": 60.0,
-            "slab_width": 120
+        "Quartz 2": {
+            "Size": {
+                "Height":60,
+                "Width": 130
+
+            },
+            "Price": 35.0
         },
-        "Color6": {
-            "sqft_price": 100,
-            "slab_height": 60.0,
-            "slab_width": 120
-        }
-    },
-    "Brand3": {
-        "Color7": {
-            "sqft_price": 100,
-            "slab_height": 60.0,
-            "slab_width": 120
-        },
-        "Color8": {
-            "sqft_price": 100,
-            "slab_height": 60.0,
-            "slab_width": 120
-        },
-        "Color9": {
-            "sqft_price": 100,
-            "slab_height": 60.0,
-            "slab_width": 120
+        "Quartz 3": {
+            "Size": {
+                "Height":60,
+                "Width": 130
+
+            },
+            "Price": 30.0
         }
     }
 }
+

@@ -173,6 +173,8 @@ class QuoteGenerator:
         #load non-stocked stone data
         with open(ns_stone_data_json,"r") as ns_stone_info:
             self.nonstocked_stone_data = json.load(ns_stone_info)
+        self.nonstocked_stone_data = self.nonstocked_stone_data #this is a work around for the time being, because the stocked laminate is stored along side of the add-on information, it might be worth reworking where the add-on data gets pulled and removing this step but it works either way
+        
 
 
 
@@ -249,8 +251,8 @@ class QuoteGenerator:
 
     def submit_ns_stone(self):
         brand,color = self.ns_stone_brand.get(),self.ns_stone_color.get()
-        price = self.nonstocked_stone_data[brand][color]['sqft_price']
-        ns_selection = [brand, color,price]
+        # price = self.nonstocked_stone_data[brand][color]['Price']#saved but not currently used in code
+        ns_selection = [brand, color]
         ns_selection_key = ": ".join(ns_selection[0:2])
         if ns_selection_key not in self.ns_stone_lbls_dict:
         
@@ -266,11 +268,11 @@ class QuoteGenerator:
             ns_stone_delete_btn.pack(side=tk.RIGHT)
             self.ns_stone_lbls_dict[ns_selection_key] = ns_selection_frm
         else:
-            print('raise error for selection already made') #TODO: This
+            messagebox.showerror("Error Submitting Non-Stocked Selection", "Selection Already Made")
 
 
     def delete_ns_stone_row(self,selection):
-        print(self.ns_stone_lbls_dict)
+
         self.ns_stone_lbls_dict[selection].destroy()
         self.ns_stone_lbls_dict.pop(selection)
         print(self.ns_stone_lbls_dict)
@@ -296,14 +298,13 @@ class QuoteGenerator:
 
 
     def add_non_stocked_lam_cmd(self):
-        ns_lam_data_json = r"jsons\non_stock_stone.json"
+        ns_lam_data_json = r"jsons\non_stock_lam.json"
         """This imports the pricing structures saved under 'data_json' and saves them as 'self.pricing_data' """
 
 
         #load non-stocked lam data
         with open(ns_lam_data_json,"r") as ns_lam_info:
             self.nonstocked_lam_data = json.load(ns_lam_info)
-
 
 
         #create window
@@ -370,9 +371,16 @@ class QuoteGenerator:
             self.ns_lam_submit_btn.config(state=tk.DISABLED)
 
     def submit_ns_lam(self):
+        
         brand,color = self.ns_lam_brand.get(),self.ns_lam_color.get()
-        price = self.nonstocked_lam_data[brand][color]['sqft_price']
-        ns_selection = [brand, color,price]
+        
+        # #find pricing from brand and color
+        # for level, details in self.nonstocked_lam_data[brand].items():
+        #     if color in details['Color']:
+        #         break
+
+        # price = self.nonstocked_lam_data[brand][level]['Price'] #saved but not currently in code
+        ns_selection = [brand, color]
         ns_selection_key = ": ".join(ns_selection[0:2])
 
 
@@ -385,17 +393,17 @@ class QuoteGenerator:
             ns_lam_lbl.pack(side=tk.LEFT)
 
 
-            ns_lam_delete_btn = tk.Button(ns_selection_frm,text='X', command= lambda selection = ns_selection: self.delete_ns_lam_row(selection))
+            ns_lam_delete_btn = tk.Button(ns_selection_frm,text='X', command= lambda selection = ns_selection_key: self.delete_ns_lam_row(selection))
 
             
             ns_lam_delete_btn.pack(side=tk.RIGHT)
             self.ns_lam_lbls_dict[ns_selection_key] = ns_selection_frm 
         else:#hello working on using the dicitonary to add to stone or laminate fucnation cause it nwo has the pricing too, add it to the pricing_levels  at other hello
-            print('raise error for selection already made') #TODO: This
+            messagebox.showerror("Error Submitting Non-Stocked Selection", "Selection Already Made")
+
 
     def delete_ns_lam_row(self,selection):
-        print(selection)
-        print(self.ns_lam_lbls_dict)
+
         self.ns_lam_lbls_dict[selection].destroy()
         self.ns_lam_lbls_dict.pop(selection)
         print(self.ns_lam_lbls_dict)
@@ -404,8 +412,14 @@ class QuoteGenerator:
     def load_lam_colors(self,brand):
         #find brand in json and load names
         brand = brand.get()
+        self.color_options= []
+        brand_data = self.nonstocked_lam_data[brand]
+        for level in self.nonstocked_lam_data[brand]:
+            for color in brand_data[level]['Color']:
+                self.color_options.append(color)
+        self.color_options = sorted(self.color_options)
 
-        self.color_options = [color for color in self.nonstocked_lam_data[brand].keys()]
+        # self.color_options = [level['Color'] for level in brand_data]
         self.color_dropdown['menu'].delete(0, 'end')
         for option in self.color_options:
             self.color_dropdown['menu'].add_command(label=option, command=tk._setit(self.ns_lam_color, option))
@@ -437,13 +451,13 @@ class QuoteGenerator:
         with open(stone_data_json,"r") as stone_pricing_data:
             self.pricing_data['Stone'] = json.load(stone_pricing_data)
 
-    def lam_quote(self,sqft,multiplier):
-        
-
+    def lam_quote(self,sqft,multiplier,NonStocked = ''):
+        if NonStocked: #this is a work around so that I can use the lam quote for non-stocked or stocked lamiante
+            NonStocked = "Nonstocked "
 
         # info for pricing structures on stones
 
-        lam_levels = self.pricing_data['Self Edge']["lam_levels"]
+        lam_levels = self.pricing_data[f'{NonStocked}Self Edge']["lam_levels"]
 
         # pricing on add-ons
         add_ons = self.pricing_data['Self Edge']["add_ons"]
@@ -458,7 +472,7 @@ class QuoteGenerator:
         
 
         # takes the entries for the quantities of add-ons and multiplies it by the preset values to get costs of add-ons
-        add_on_price = {key: add_ons[key] * self.add_on_quants[key] for key in add_ons}
+        add_on_price = {key: add_ons[key] * self.add_on_quants["Self Edge"][key] for key in add_ons}
 
         #change dictionary of levels to also have a price?
 
@@ -480,10 +494,12 @@ class QuoteGenerator:
 
         # TODO: add in check for prices under $250
         return lam_levels
-    def stone_quote(self,sqft,multiplier):
+    def stone_quote(self,sqft,multiplier,NonStocked = ''):
+        if NonStocked: #this is a work around so that I can use the stone quote for non-stocked or stocked lamiante
+            NonStocked = "Nonstocked "
     
         # pre-set values
-        fabrication_cost = self.pricing_data['Stone']["fabrication_cost"]
+        fabrication_cost = self.pricing_data[f'{NonStocked}Stone']["fabrication_cost"]
         mark_up = self.pricing_data['Stone']["mark_up"]
 
 
@@ -506,7 +522,7 @@ class QuoteGenerator:
         
 
         # takes the entries for the quantities of add-ons and multiplies it by the preset values to get costs of add-ons
-        add_on_price = {key: add_ons[key] * self.add_on_quants[key] for key in add_ons}
+        add_on_price = {key: add_ons[key] * self.add_on_quants["Stone"][key] for key in add_ons}
 
         #change dictionary of levels to also have a price?
 
@@ -515,21 +531,49 @@ class QuoteGenerator:
 
             stone_levels[stone_level]['Price'] = get_final_stone_price(sqft_cost)
         return stone_levels
+    def import_ns_data(self, material):
+        
+        ns_self_edge_data_json = r"jsons\non_stock_lam.json"
+        ns_self_stone_data_json = r"jsons\non_stock_stone.json"
 
+        self.data_jsons = {'NonStocked Self Edge': ns_self_edge_data_json, 'NonStocked Stone': ns_self_stone_data_json}
+        """This imports the pricing structures saved under 'data_json' and saves them as 'self.pricing_data' """
+        print(self.data_jsons[material])
+        with open(self.data_jsons[material],"r") as pricing_data:
+            self.pricing_data[material] = json.load(pricing_data)
 
 
     def print_quote(self):
-
+        test = self.materialSelection.get()
+        self.material_selection_window.destroy()
         
         """Updates and then creates a PDF from a premade excel form used as a template"""
         #TODO: Turn self edge print quote and stone print quote into seperate fucntions for legibility
         if not self.multiplier_ent.get():
+            messagebox.showerror("No Multiplier", "No multiplier entered. Please enter a multiplier")
+            self.multiplier_ent.focus_set()
             return
+        
+
+
+        #TODO: adjust print quote, add stuff to insert non-stocked material etc. 
         # get entered multiplier
         multiplier = float(self.multiplier_ent.get())
 
         # load pricing data for quote
         self.import_pricing_data()
+
+
+
+
+        if self.ns_lam_lbls_dict:
+            self.import_ns_data("NonStocked Self Edge")
+            #TODO: figure out waste material
+        
+        if self.ns_stone_lbls_dict:
+            self.import_ns_data("NonStocked Stone")
+
+        
 
         #load edging
         print(self.material)
@@ -577,7 +621,7 @@ class QuoteGenerator:
         # if self.
 
 
-
+        #TODO: pretty sure this is going to need to be a for loop or i will have to edit creatQuoteFromData
         createQuoteFromData(self.jobData,pricing_levels,upgrade_edge_pricing,self.folderpath,self.filepath,self.add_on_quants,self.material)
 
     def validate_ent(self, input, char):
@@ -786,12 +830,48 @@ class QuoteGenerator:
     def submit_button(self):
         """Updates self.add_on_quants from the entry widgets and calls self.print_quote()"""
         # create a dictionary of the entries with the corresponding names
-        self.add_on_quants = {v._name: int(v.get()) for v in self.entries[self.material]}
+        entry_check = 0
 
-        ##print the quote out
-        self.print_quote()
+        # self.material_selection_window.rowconfigure()
+
+        # lamCheckBox = tk.Checkbutton(self.material_selection_window, text="Self Edge")
+        # lamCheckBox.pack()
+        # stoneCheckBox = tk.Checkbutton(self.material_selection_window, text = "Stone")
+        # stoneCheckBox.pack()    
+        self.material_selection_window = tk.Toplevel()
+        self.materialSelection = tk.StringVar()
+        
+        # Create radio buttons
+        selfEdgeRadial = tk.Radiobutton(self.material_selection_window, text='Self Edge', variable=self.materialSelection, value='Self Edge')
+        selfEdgeRadial.pack()
+        
+        stoneRadial = tk.Radiobutton(self.material_selection_window, text='Stone', variable=self.materialSelection, value='Stone')
+        stoneRadial.pack()
+
+        bothRadial = tk.Radiobutton(self.material_selection_window, text='Both', variable=self.materialSelection, value='Both')
+        bothRadial.pack()
+
+        
+        # Create "Confirm" button with a command to call print_quote
+        self.confirmSelectionBtn = tk.Button(self.material_selection_window, text="Confirm", command=self.print_quote, state = tk.DISABLED)
+        self.confirmSelectionBtn.pack()
+        
+        # Add a trace to the StringVar to enable/disable the button based on selection
+        self.materialSelection.trace('w', self.update_confirm_button_state)
 
 
+        self.material_selection_window.mainloop()
+
+
+    def update_confirm_button_state(self, *args):
+        # Callback function to enable/disable the "Confirm" button
+        selected_value = self.materialSelection.get()
+        if selected_value:
+            # Enable the button if a selection is made
+            self.confirmSelectionBtn.config(state=tk.NORMAL)
+        else:
+            # Disable the button if no selection is made
+            self.confirmSelectionBtn.config(state=tk.DISABLED)
 
 
     def check_password(self, entered_password_bytes):
