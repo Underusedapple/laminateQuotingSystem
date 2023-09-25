@@ -27,7 +27,6 @@ class QuoteGenerator:
         # self.main = main
         self.import_pricing_data()  # pull pricing data
         
-        self.material = 'Self Edge'
         self.ns_stone_lbls_dict = {}
         self.ns_lam_lbls_dict = {}
         self.color_selection_default = 'No selection made'
@@ -114,7 +113,7 @@ class QuoteGenerator:
 
         self.pricingTabs = { 'Self Edge':self.self_edge_add_on_frm, 'Stone': self.stone_add_on_frm }
 
-        self.pricingTabControl.bind("<ButtonRelease-1>", self.set_material)
+        # self.pricingTabControl.bind("<ButtonRelease-1>", self.set_material)
 
 
 
@@ -432,13 +431,13 @@ class QuoteGenerator:
 
         self.check_ns_lam_label()
 
-    def set_material(self,event):
-        index = self.pricingTabControl.index('current')
-        if index == 0:
-            self.material = 'Self Edge'
-        elif index == 1:
-            self.material = 'Stone'
-        print(self.material)
+    # def set_material(self,event):   #this was used to set material when switching tabs
+    #     index = self.pricingTabControl.index('current')
+    #     if index == 0:
+    #         self.material = 'Self Edge'
+    #     elif index == 1:
+    #         self.material = 'Stone'
+    #     print(self.material)
 
     def import_pricing_data(self):
         self_edge_data_json = r"jsons\lam_pricing_data.json"
@@ -472,7 +471,7 @@ class QuoteGenerator:
         
 
         # takes the entries for the quantities of add-ons and multiplies it by the preset values to get costs of add-ons
-        add_on_price = {key: add_ons[key] * self.add_on_quants["Self Edge"][key] for key in add_ons}
+        add_on_price = {key: add_ons[key] * self.add_on_quants[key] for key in add_ons}
 
         #change dictionary of levels to also have a price?
 
@@ -522,7 +521,7 @@ class QuoteGenerator:
         
 
         # takes the entries for the quantities of add-ons and multiplies it by the preset values to get costs of add-ons
-        add_on_price = {key: add_ons[key] * self.add_on_quants["Stone"][key] for key in add_ons}
+        add_on_price = {key: add_ons[key] * self.add_on_quants[key] for key in add_ons}
 
         #change dictionary of levels to also have a price?
 
@@ -543,10 +542,15 @@ class QuoteGenerator:
             self.pricing_data[material] = json.load(pricing_data)
 
 
-    def print_quote(self):
-        test = self.materialSelection.get()
+    def print_quote(self, material):
+
+        # create a dictionary of the entries with the corresponding names
+        self.add_on_quants = {v._name: int(v.get()) for v in self.entries[self.material]}
+
+
+
+            
         self.material_selection_window.destroy()
-        
         """Updates and then creates a PDF from a premade excel form used as a template"""
         #TODO: Turn self edge print quote and stone print quote into seperate fucntions for legibility
         if not self.multiplier_ent.get():
@@ -568,7 +572,7 @@ class QuoteGenerator:
 
         if self.ns_lam_lbls_dict:
             self.import_ns_data("NonStocked Self Edge")
-            #TODO: figure out waste material
+            #TODO: not need to parse to enter non-stocked stuff to quote
         
         if self.ns_stone_lbls_dict:
             self.import_ns_data("NonStocked Stone")
@@ -853,7 +857,7 @@ class QuoteGenerator:
 
         
         # Create "Confirm" button with a command to call print_quote
-        self.confirmSelectionBtn = tk.Button(self.material_selection_window, text="Confirm", command=self.print_quote, state = tk.DISABLED)
+        self.confirmSelectionBtn = tk.Button(self.material_selection_window, text="Confirm", command = self.run_print_quote, state = tk.DISABLED)
         self.confirmSelectionBtn.pack()
         
         # Add a trace to the StringVar to enable/disable the button based on selection
@@ -861,7 +865,21 @@ class QuoteGenerator:
 
 
         self.material_selection_window.mainloop()
+    
+    def run_print_quote(self):
+        self.material = self.materialSelection.get()
 
+        if not self.material:
+            messagebox.showerror("No Selection", "No selection made. Please make a selection.")
+            return
+
+
+
+        if self.material == "Both":
+            self.print_quote("Self Edge")
+            self.print_quote("Stone")
+        else:
+            self.print_quote(self.material)
 
     def update_confirm_button_state(self, *args):
         # Callback function to enable/disable the "Confirm" button
@@ -922,6 +940,8 @@ class QuoteGenerator:
         chnge_pssword_btn = tk.Button(
             self.advanced_window, text="Change Password", command=self.change_password_cmd
         ).grid(column=0,row=1, sticky='nsew', padx=5, pady=3)
+
+
     def change_password_cmd(self):
         """Opens frame to update password and save"""
         def submit_password(*args):
