@@ -6,7 +6,8 @@
                 "Width": 130
 
             },
-            "Price": 30.0
+            "Price": 30.0,
+            "Cost": 1
         },
         "Virginia Mist": {
             "Size": {
@@ -14,7 +15,8 @@
                 "Width": 130
 
             },
-            "Price": 35.0
+            "Price": 35.0,
+            "Cost": 1
         },
         "Fantasy Black": {
             "Size": {
@@ -22,7 +24,8 @@
                 "Width": 130
 
             },
-            "Price": 30.0
+            "Price": 30.0,
+            "Cost": 1
         }
     },
     "Q Quartz" : {
@@ -32,7 +35,8 @@
                 "Width": 130
 
             },
-            "Price": 30.0
+            "Price": 30.0,
+            "Cost": 1
         },
         "Quartz 2": {
             "Size": {
@@ -40,7 +44,8 @@
                 "Width": 130
 
             },
-            "Price": 35.0
+            "Price": 35.0,
+            "Cost": 1
         },
         "Quartz 3": {
             "Size": {
@@ -48,7 +53,8 @@
                 "Width": 130
 
             },
-            "Price": 30.0
+            "Price": 30.0,
+            "Cost": 1
         }
     }
 }
