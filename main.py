@@ -2,7 +2,7 @@
 # TODO: create a Focus out ont he entries that if left empty they revert to '0' (around line 365)
 
 
-
+import time
 import json
 import os
 import re
@@ -11,6 +11,7 @@ from tkinter import filedialog as fd
 from tkinter import messagebox,ttk
 import math
 import bcrypt
+import asyncio
 from Material_Level_Button import Material_Level_Button
 from FabCostAndMarkUpButton import Fab_Cost_Mark_Up_button
 from EdgesAndAddOnButton import Edge_and_Add_On_Button
@@ -424,13 +425,7 @@ class QuoteGenerator:
 
         self.check_ns_lam_label()
 
-    # def set_material(self,event):   #this was used to set material when switching tabs
-    #     index = self.pricingTabControl.index('current')
-    #     if index == 0:
-    #         self.material = 'Self Edge'
-    #     elif index == 1:
-    #         self.material = 'Stone'
-    #     print(self.material)
+
 
     def import_pricing_data(self):
         self_edge_data_json = r"jsons\lam_pricing_data.json"
@@ -443,7 +438,7 @@ class QuoteGenerator:
         with open(stone_data_json,"r") as stone_pricing_data:
             self.pricing_data['Stone'] = json.load(stone_pricing_data)
 
-    def lam_quote(self,sqft,multiplier):
+    async def lam_quote(self,sqft,multiplier):
 
         # info for pricing structures on stones
 
@@ -463,33 +458,36 @@ class QuoteGenerator:
         
 
         # takes the entries for the quantities of add-ons and multiplies it by the preset values to get costs of add-ons
-        add_on_price = {key: add_ons[key] * self.add_on_quants[key] for key in add_ons}
+        add_on_price = {key: add_ons[key] * self.lamAddOnQuants[key] for key in add_ons}
 
         #change dictionary of levels to also have a price?
 
-        for level in lam_levels:
-            sqft_cost = lam_levels[level]['Price'] #prettify the get final price
 
-            lam_levels[level]['Price'] = get_final_lam_price(sqft_cost)
+        async def getLamPrice(lamLevel):
+            sqft_cost = lam_levels[lamLevel]['Price'] #prettify the get final price
 
-            if "Nonstocked" in level:
-                wasteMaterialCost = math.ceil(lam_levels[level]['SheetQty'] * 60 * lam_levels[level]['Cost'] * multiplier)
+            lam_levels[lamLevel]['Price'] = get_final_lam_price(sqft_cost)
+
+            if "Nonstocked" in lamLevel:
+                wasteMaterialCost = math.ceil(lam_levels[lamLevel]['SheetQty'] * 60 * lam_levels[level]['Cost'] * multiplier)
                 print(wasteMaterialCost)
-                lam_levels[level]['Price'] += wasteMaterialCost
+                lam_levels[lamLevel]['Price'] += wasteMaterialCost
             #laminate minumum $250 check
             #TODO: 10-4-23 rework how stone check for non-stocks like here in the laminate quote
-            if lam_levels[level]['Price'] < 250:
+            if lam_levels[lamLevel]['Price'] < 250:
                 full_charge = self.pricing_data['Self Edge']['add_ons']['trip_charge']* multiplier
-                current_level_price = lam_levels[level]['Price']
+                current_level_price = lam_levels[lamLevel]['Price']
                 increase_options = [250 - current_level_price,full_charge] #price is the lower of either the difference or half a trip charge
                 price_increase = min(increase_options)
                 print(price_increase, 'options where', increase_options)
-                lam_levels[level]['Price'] = math.ceil(current_level_price + price_increase)
+                lam_levels[lamLevel]['Price'] = math.ceil(current_level_price + price_increase)
 
+        lamPricingTasks = [getLamPrice(lamLevel) for lamLevel in lam_levels]
 
+        await asyncio.gather(*lamPricingTasks)
 
         return lam_levels
-    def stone_quote(self,sqft,multiplier):
+    async def stone_quote(self,sqft,multiplier):
     
         # pre-set values
         fabrication_cost = self.pricing_data[f'Stone']["fabrication_cost"]
@@ -515,11 +513,14 @@ class QuoteGenerator:
         
 
         # takes the entries for the quantities of add-ons and multiplies it by the preset values to get costs of add-ons
-        add_on_price = {key: add_ons[key] * self.add_on_quants[key] for key in add_ons}
+        add_on_price = {key: add_ons[key] * self.stoneAddOnQuants[key] for key in add_ons}
 
         #change dictionary of levels to also have a price?
 
-        for stone_level in stone_levels: #add async
+
+
+        async def getStonePrice(stone_level):
+
             sqft_cost = stone_levels[stone_level]['Price'] #prettify the get final price
 
             stone_levels[stone_level]['Price'] = get_final_stone_price(sqft_cost)
@@ -528,23 +529,29 @@ class QuoteGenerator:
 
 
             if "Nonstocked" in stone_level: 
-                wasteMaterialCost = math.ceil(stone_levels[stone_level]['SheetQty'] * 60 * stone_levels[stone_level]['Cost'] * multiplier)
+                qtySlabs = stone_levels[stone_level]['SheetQty']
+                slabSqft = stone_levels[stone_level]['SlabSqft']
+                cost = stone_levels[stone_level]['Cost']
+
+                wasteMaterialCost = math.ceil((qtySlabs * slabSqft * cost * 2 * multiplier) / mark_up )
                 print(wasteMaterialCost)
                 stone_levels[stone_level]['Price'] += wasteMaterialCost
             #laminate minumum $250 check
             #TODO: 10-4-23 rework how stone check for non-stocks like here in the laminate quote
-            if stone_levels[stone_level]['Price'] < 250:
-                full_charge = self.pricing_data['Self Edge']['add_ons']['trip_charge']* multiplier
-                current_level_price = stone_levels[stone_level]['Price']
-                increase_options = [250 - current_level_price,full_charge] #price is the lower of either the difference or half a trip charge
-                price_increase = min(increase_options)
-                print(price_increase, 'options where', increase_options)
-                stone_levels[stone_level]['Price'] = math.ceil(current_level_price + price_increase)
+            sqft
+            if sqft < 25:
+                fullCharge = self.pricing_data['Stone']['add_ons']['trip_charge'] * 2 * multiplier
+                actualCharge = (25 - sqft)/10 * fullCharge #full charge is prorated at 25sqft to 15sqft 
+                stone_levels[stone_level]['Price'] += actualCharge
 
 
+        stonePricingTasks = [getStonePrice(stone_level) for stone_level in stone_levels]
 
+        await asyncio.gather(*stonePricingTasks)
 
         return stone_levels
+    
+
     def import_ns_data(self, material):
         
         ns_self_edge_data_json = r"jsons\non_stock_lam.json"
@@ -654,18 +661,17 @@ class QuoteGenerator:
         self.ns_mat_window.destroy()
 
 
-    def print_quote(self, material):
+    async def printLamQuote(self, material):#TODO: create this into two seperate functions so they can run simeltaenously
 
         # create a dictionary of the entries with the corresponding names
-        self.add_on_quants = {v._name: int(v.get()) for v in self.entries[self.material]}
+        self.lamAddOnQuants = {v._name: int(v.get()) for v in self.entries[material]}
 
 
 
-            
-        self.material_selection_window.destroy()
+        if self.material_selection_window:
+            self.material_selection_window.destroy()
 
 
-        """Updates and then creates a PDF from a premade excel form used as a template"""
         #TODO: Turn self edge print quote and stone print quote into seperate fucntions for legibility
         if not self.multiplier_ent.get():
             messagebox.showerror("No Multiplier", "No multiplier entered. Please enter a multiplier")
@@ -716,6 +722,74 @@ class QuoteGenerator:
                 #else add to existing level
                     i += 1
 
+        
+
+        #load edging
+        edge_pricing = self.pricing_data['Self Edge']["edge_pricing"]
+      
+        
+        # get the sqft from the pdf data
+
+        sqft = self.jobData["Total Area"]
+        pricing_levels = await self.lam_quote(sqft,multiplier)#TODO: check on how to add the cost of waste material to the laminate quote. )
+
+
+
+            
+        #This is to make the linear edging in multiplicatives of 12 as that's what we order the material lengths in
+        self.jobData["Finished Lnft"] = math.ceil(self.jobData["Finished Lnft"]*1.333 /12) *12
+
+
+
+
+        # create pricing for edging
+        upgradeLamEdgePricing = {
+            edge.replace('/', ' or ').replace('_',' ').title()#edge name revised for legibility and formating
+                :math.ceil(edge_pricing[edge] * self.jobData["Finished Lnft"]) 
+                for edge in edge_pricing
+        }
+
+        for edge in upgradeLamEdgePricing:
+            upgradeLamEdgePricing[edge] = math.ceil(upgradeLamEdgePricing[edge] * multiplier)
+ 
+    
+
+
+        await createQuoteFromData(self.jobData,pricing_levels,upgradeLamEdgePricing,self.folderpath,self.filepath,self.lamAddOnQuants,material)
+
+        
+    async def printStoneQuote(self, material):#TODO: create this into two seperate functions so they can run simeltaenously
+
+        # create a dictionary of the entries with the corresponding names
+        self.stoneAddOnQuants = {v._name: int(v.get()) for v in self.entries[material]}
+
+
+
+        if self.material_selection_window:
+            self.material_selection_window.destroy()
+
+
+        """Updates and then creates a PDF from a premade excel form used as a template"""
+        #TODO: Turn self edge print quote and stone print quote into seperate fucntions for legibility
+        if not self.multiplier_ent.get():
+            messagebox.showerror("No Multiplier", "No multiplier entered. Please enter a multiplier")
+            self.multiplier_ent.focus_set()
+            return
+        
+
+
+        # get entered multiplier
+        multiplier = float(self.multiplier_ent.get())
+
+        # load pricing data for quote
+        self.import_pricing_data()
+
+
+
+        # get the sqft from the pdf data
+
+        sqft = self.jobData["Total Area"]
+
 
             
         if self.ns_stone_lbls_dict:
@@ -751,51 +825,32 @@ class QuoteGenerator:
         
 
         #load edging
-        
-        if material == 'Self Edge':
-            
-            edge_pricing = self.pricing_data['Self Edge']["edge_pricing"]
 
-        elif material == 'Stone':
-            edge_pricing = self.pricing_data['Stone']["edge_pricing"]
+        edge_pricing = self.pricing_data['Stone']["edge_pricing"]
 
         
         
         # get the sqft from the pdf data
 
         sqft = self.jobData["Total Area"]
-        if material == 'Self Edge':
-            pricing_levels = self.lam_quote(sqft,multiplier)#TODO: check on how to add the cost of waste material to the laminate quote. 
-
-
-
-            
-            #This is to make the linear edging in multiplicatives of 12 as that's what we order the material lengths in
-            self.jobData["Finished Lnft"] = math.ceil(self.jobData["Finished Lnft"]*1.333 /12) *12
-        elif material == 'Stone':
-            pricing_levels = self.stone_quote(sqft,multiplier)
+        pricing_levels = await self.stone_quote(sqft,multiplier)
 
 
 
         # create pricing for edging
-        upgrade_edge_pricing = {
+        upgradeStoneEdgePricing = {
             edge.replace('/', ' or ').replace('_',' ').title()#edge name revised for legibility and formating
                 :math.ceil(edge_pricing[edge] * self.jobData["Finished Lnft"]) 
                 for edge in edge_pricing
         }
 
-        if material == 'Self Edge':
-            for edge in upgrade_edge_pricing:
-                upgrade_edge_pricing[edge] = math.ceil(upgrade_edge_pricing[edge] * multiplier)
-        elif material == 'Stone':
-            for edge in upgrade_edge_pricing:
-                upgrade_edge_pricing[edge] = math.ceil(upgrade_edge_pricing[edge] * 2 * multiplier)
+        for edge in upgradeStoneEdgePricing:
+            upgradeStoneEdgePricing[edge] = math.ceil(upgradeStoneEdgePricing[edge] * 2 * multiplier)
         
     
 
 
-        #TODO: pretty sure this is going to need to be a for loop or i will have to edit creatQuoteFromData
-        createQuoteFromData(self.jobData,pricing_levels,upgrade_edge_pricing,self.folderpath,self.filepath,self.add_on_quants,self.material)
+        await createQuoteFromData(self.jobData,pricing_levels,upgradeStoneEdgePricing,self.folderpath,self.filepath,self.stoneAddOnQuants,material)
 
     def validate_ent(self, input, char):
         """Checks for numerical inputs only"""
@@ -1001,7 +1056,7 @@ class QuoteGenerator:
                 entry.insert(0, "0")
 
     def submit_button(self):
-        """Updates self.add_on_quants from the entry widgets and calls self.print_quote()"""
+        """"""
         # create a dictionary of the entries with the corresponding names
         entry_check = 0
 
@@ -1026,7 +1081,7 @@ class QuoteGenerator:
 
         
         # Create "Confirm" button with a command to call print_quote
-        self.confirmSelectionBtn = tk.Button(self.material_selection_window, text="Confirm", command = self.run_print_quote, state = tk.DISABLED)
+        self.confirmSelectionBtn = tk.Button(self.material_selection_window, text="Confirm", command = lambda: asyncio.run(self.runPrintQuote()), state = tk.DISABLED)
         self.confirmSelectionBtn.pack()
         
         # Add a trace to the StringVar to enable/disable the button based on selection
@@ -1035,7 +1090,7 @@ class QuoteGenerator:
 
         self.material_selection_window.mainloop()
     
-    def run_print_quote(self):
+    async def runPrintQuote(self):
         self.material = self.materialSelection.get()
 
         if not self.material:
@@ -1045,11 +1100,19 @@ class QuoteGenerator:
 
         
         if self.material == "Both":
-            self.print_quote("Self Edge")
-            self.print_quote("Stone")
-        else:
-            self.print_quote(self.material)
+            startTime = time.time()
+            lamQuoteTask = asyncio.create_task(self.printLamQuote("Self Edge"))
+            stoneQuoteTask = asyncio.create_task(self.printStoneQuote("Stone"))
 
+            #stone quote is run first because lamquote alters the finished lnft data
+            await asyncio.gather(stoneQuoteTask,lamQuoteTask) 
+            endTime = time.time()
+            totalTime = endTime-startTime
+            print(f'it took {totalTime} to run both print quotes')
+        elif self.material == 'Self Edge':
+            asyncio.run(self.printLamQuote(self.material))
+        else:
+            asyncio.run(self.printStoneQuote(self.material))
     def update_confirm_button_state(self, *args):
         # Callback function to enable/disable the "Confirm" button
         selected_value = self.materialSelection.get()
