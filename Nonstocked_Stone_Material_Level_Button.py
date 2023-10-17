@@ -10,7 +10,7 @@ from tkinter import messagebox
 
 
 # make buttons
-class Material_Level_Button(tk.Button):
+class Nonstocked_Stone_Material_Level_Button(tk.Button):
     def __init__(self, window, pricing_data,material, main, name="", *args, **kwargs):
         self.name = tk.StringVar()
         self.name.set(name.replace("_", " ").title())
@@ -48,20 +48,28 @@ class Material_Level_Button(tk.Button):
             # get level name and remove white space
             level_name = self.stone_level_name_box[x][0].get("1.0", tk.END).strip()
 
-            # get level colors and remove white space
-            level_colors = self.stone_level_color_box[x][0].get("1.0", tk.END)
-            level_colors = level_colors.split(",")
-            for y, color in enumerate(level_colors):
-                level_colors[y] = color.strip()
+            # get level height and remove white space
+            level_height = float(self.stone_level_height_box[x][0].get("1.0", tk.END).strip())
+
+            # get level height and remove white space
+            level_width = float(self.stone_level_width_box[x][0].get("1.0", tk.END).strip())
 
             # get level price and remove white space
             level_price = float(self.stone_level_price_box[x][0].get("1.0", tk.END))
 
+
+            # get leve cost and remove white space
+            level_cost = float(self.stone_level_cost_box[x][0].get("1.0", tk.END))
+
+
+
             # store that data using the iterator to name them individually
             new_data[f"{material}_{x}"] = {
                 "Name": level_name,
-                "Color": level_colors,
+                "Size": {"Height":level_height,
+                         "Width":level_width},
                 "Price": level_price,
+                "Cost": level_cost
             }
 
 
@@ -163,19 +171,21 @@ class Material_Level_Button(tk.Button):
         # self.main.edit_info_btn_page.withdraw()
 
         # pull stone levels from pricing data
-
-        json_data = self.pricing_data[self.json_locator]
+        if 'Nonstocked' in self.material:
+            json_data = self.pricing_data
+        else:
+            json_data = self.pricing_data[self.json_locator]
 
         # create new window
         self.popup = tk.Toplevel()
-        self.popup.resizable(False, False)
+        # self.popup.resizable(False, False)
         self.popup.title("TextBox Input")
 
         self.scrollbar=tk.Scrollbar(self.popup, orient=tk.VERTICAL)
         self.scrollbar.grid(row=0, column=1, sticky="ns")
 
-        self.textbox_canvas = tk.Canvas(self.popup, width=500,
-                         scrollregion=(0,0,500,800)) 
+        self.textbox_canvas = tk.Canvas(self.popup, width=750,
+                         scrollregion=(0,0,750,800)) 
         self.textbox_canvas.grid(row=0, column=0, sticky="nsew") 
         self.textbox_canvas.bind_all("<MouseWheel>",self._on_mousewheel)
 
@@ -205,49 +215,67 @@ class Material_Level_Button(tk.Button):
         # TextBox Creation
         # lists to store tbox and the corresponding inputs
         self.stone_level_name_box = []
-        self.stone_level_color_box = []
+        self.stone_level_height_box = []
+        self.stone_level_width_box = []
         self.stone_level_price_box = []
+        self.stone_level_cost_box = []
 
         # lists of the above lists
         self.stone_level_textboxes = [
             self.stone_level_name_box,
-            self.stone_level_color_box,
+            self.stone_level_height_box,
+            self.stone_level_width_box,
             self.stone_level_price_box,
+            self.stone_level_cost_box
         ]
 
-        for input in json_data:
+        for input in json_data[self.json_locator]:
 
 
             # make tboxs as variables
             new_name_box = [
                 Multi_data_textbox(self.edit_page_frame, height=3, width=20),
-                input,
+                input
             ]
-            new_color_box = [
+            new_height_box = [
                 Multi_data_textbox(self.edit_page_frame, height=3, width=20),
-                input,
+                input
             ]
+            new_width_box = [
+                Multi_data_textbox(self.edit_page_frame, height=3, width=20),
+                input
+            ]            
             new_price_box = [
                 Multi_data_textbox(self.edit_page_frame, height=3, width=20),
-                input,
+                input
             ]
+            new_cost_box = [
+                Multi_data_textbox(self.edit_page_frame, height=3, width=20),
+                input
+            ]
+            
 
             # set tab to new focus
             new_name_box[0].bind("<Tab>", self.focus_next_window)
-            new_color_box[0].bind("<Tab>", self.focus_next_window)
+            new_height_box[0].bind("<Tab>", self.focus_next_window)
+            new_width_box[0].bind("<Tab>", self.focus_next_window)
             new_price_box[0].bind("<Tab>", self.focus_next_window)
+            new_cost_box[0].bind("<Tab>", self.focus_next_window)
+
 
             # add boxes to list
             self.stone_level_name_box.append(new_name_box)
-            self.stone_level_color_box.append(
-                new_color_box
-            )  ###this will need to be a button to create individual boxes
+            self.stone_level_height_box.append(new_height_box)
+            self.stone_level_width_box.append(new_width_box)
             self.stone_level_price_box.append(new_price_box)
+            self.stone_level_cost_box.append(new_cost_box)
 
         input_parser = [
             "Name",
-            "Color",
+            "Height",
+            "Width",
             "Price",
+            "Cost"
         ]  # used to parse through individual stone level data
         for y, list_of_tbox in enumerate(self.stone_level_textboxes):
             x = 0
@@ -257,7 +285,12 @@ class Material_Level_Button(tk.Button):
                 # input is the level of stone
                 # input parser give you either the name, color, or price for that level pending on the iterator "y"
                 # and y is simultaneously used for the input parser and column since all Name boxes are column 1, Colors column 2, and Pricing Column 3
-                tbox_label = str(json_data[input][input_parser[y]])
+
+                if y in [1,2]:
+                    tbox_label = str(json_data[self.json_locator][input]['Size'][input_parser[y]])
+                else:
+                    tbox_label = str(json_data[self.json_locator][input][input_parser[y]])
+
                 print(tbox_label)
                 tbox_label = (
                     tbox_label.replace("{", "")
@@ -266,6 +299,7 @@ class Material_Level_Button(tk.Button):
                     .replace("]", "")
                     .replace("'", "")
                 )
+                
                 tbox.insert(index=1.0, chars=tbox_label)
                 tbox.grid(row=x, column=y)
                 x += 1  # iterator for the rows
@@ -312,7 +346,7 @@ if __name__ == "__main__":
 
     # make and add buttons to list
     for data in pricing_data:
-        btns.append(Material_Level_Button(window, pricing_data, data, name='stone_levels'))
+        btns.append(Nonstocked_Stone_Material_Level_Button(window, pricing_data, data, name='stone_levels'))
 
     # pack buttons onto window
     for n, btn in enumerate(btns):

@@ -13,6 +13,8 @@ import math
 import bcrypt
 import asyncio
 from Material_Level_Button import Material_Level_Button
+from Nonstocked_Self_Edge_Material_Level_Button import Nonstocked_Self_Edge_Material_Level_Button
+from Nonstocked_Stone_Material_Level_Button import Nonstocked_Stone_Material_Level_Button
 from FabCostAndMarkUpButton import Fab_Cost_Mark_Up_button
 from EdgesAndAddOnButton import Edge_and_Add_On_Button
 from ExtractDataFromPdf import extractDataFromPdf
@@ -26,7 +28,7 @@ class QuoteGenerator:
         
 
         # self.main = main
-        self.import_pricing_data()  # pull pricing data
+        asyncio.run(self.import_pricing_data())  # pull pricing data
         
         self.ns_stone_lbls_dict = {}
         self.ns_lam_lbls_dict = {}
@@ -159,14 +161,15 @@ class QuoteGenerator:
 
 
     def add_non_stocked_stone_cmd(self):
-        ns_stone_data_json = r"jsons\non_stock_stone.json"
         """This imports the pricing structures saved under 'data_json' and saves them as 'self.pricing_data' """
 
+        # ns_stone_data_json = r"jsons\non_stock_stone.json"
 
-        #load non-stocked stone data
-        with open(ns_stone_data_json,"r") as ns_stone_info:
-            self.nonstocked_stone_data = json.load(ns_stone_info)
-        self.nonstocked_stone_data = self.nonstocked_stone_data #this is a work around for the time being, because the stocked laminate is stored along side of the add-on information, it might be worth reworking where the add-on data gets pulled and removing this step but it works either way
+        # with open(ns_stone_data_json,"r") as ns_stone_info:
+        #     self.nonstocked_stone_data = json.load(ns_stone_info)
+
+
+        self.nonstocked_stone_data = self.pricing_data['Nonstocked Stone'] #this is a work around for the time being, because the stocked laminate is stored along side of the add-on information, it might be worth reworking where the add-on data gets pulled and removing this step but it works either way
         
 
 
@@ -186,7 +189,7 @@ class QuoteGenerator:
 
 
         # Brand and Color Dropdown menu options
-        brand_options = [brand for brand in self.nonstocked_stone_data.keys()]
+        brand_options = [brand for brand in self.nonstocked_stone_data]
         self.color_options = []#this is filled in later
         
         #object for menu text
@@ -275,8 +278,12 @@ class QuoteGenerator:
     def load_stone_colors(self,brand):
         #find brand in json and load names
         brand = brand.get()
+        self.color_options= []
+        brand_data = self.nonstocked_stone_data[brand]
+        for color in brand_data:
+            self.color_options.append(brand_data[color]['Name'])
+        self.color_options = sorted(self.color_options)
 
-        self.color_options = [color for color in self.nonstocked_stone_data[brand].keys()]
         self.color_dropdown['menu'].delete(0, 'end')
         for option in self.color_options:
             self.color_dropdown['menu'].add_command(label=option, command=tk._setit(self.ns_stone_color, option))
@@ -291,13 +298,12 @@ class QuoteGenerator:
 
 
     def add_non_stocked_lam_cmd(self):
-        ns_lam_data_json = r"jsons\non_stock_lam.json"
         """This imports the pricing structures saved under 'data_json' and saves them as 'self.pricing_data' """
 
 
-        #load non-stocked lam data
-        with open(ns_lam_data_json,"r") as ns_lam_info:
-            self.nonstocked_lam_data = json.load(ns_lam_info)
+
+
+        self.nonstocked_lam_data = self.pricing_data['Nonstocked Self Edge']
 
 
         #create window
@@ -407,12 +413,11 @@ class QuoteGenerator:
         brand = brand.get()
         self.color_options= []
         brand_data = self.nonstocked_lam_data[brand]
-        for level in self.nonstocked_lam_data[brand]:
+        for level in brand_data:
             for color in brand_data[level]['Color']:
                 self.color_options.append(color)
         self.color_options = sorted(self.color_options)
 
-        # self.color_options = [level['Color'] for level in brand_data]
         self.color_dropdown['menu'].delete(0, 'end')
         for option in self.color_options:
             self.color_dropdown['menu'].add_command(label=option, command=tk._setit(self.ns_lam_color, option))
@@ -426,17 +431,32 @@ class QuoteGenerator:
         self.check_ns_lam_label()
 
 
+    #might make this a decorator but haven't decided
+    async def import_pricing_data(self):
+        """This imports the pricing structures from jsons folder and saves them as 'self.pricing_data' """
 
-    def import_pricing_data(self):
-        self_edge_data_json = r"jsons\lam_pricing_data.json"
-        stone_data_json = r"jsons\stone_pricing_data.json"
-        self.data_jsons = {'Self Edge': self_edge_data_json, 'Stone': stone_data_json}
+        async def pullData(key,html):
+            #load each html and save to self.pricingdata
+            with open(html,"r") as pricingData:
+                self.pricing_data[key] = json.load(pricingData)
         self.pricing_data = {}
-        """This imports the pricing structures saved under 'data_json' and saves them as 'self.pricing_data' """
-        with open(self_edge_data_json,"r") as se_pricing_data:
-            self.pricing_data['Self Edge'] = json.load(se_pricing_data)
-        with open(stone_data_json,"r") as stone_pricing_data:
-            self.pricing_data['Stone'] = json.load(stone_pricing_data)
+
+        #lined each one for ease of correcting later
+        selfEdgeDataHtml = r"jsons\lam_pricing_data.json"
+        stoneDataHtml = r"jsons\stone_pricing_data.json"
+        nsSelfEdgeDataHtml = r"jsons\non_stock_lam.json"
+        nsStoneDataHtmlr = r"jsons\non_stock_stone.json"
+
+        #store htmls in a dict
+        self.data_jsons = {'Self Edge': selfEdgeDataHtml, 
+                           'Stone': stoneDataHtml, 
+                           'Nonstocked Self Edge': nsSelfEdgeDataHtml,
+                           'Nonstocked Stone': nsStoneDataHtmlr}
+        #pull data
+        pullDataTasks = [pullData(key,html) for key,html in self.data_jsons.items()]
+        await asyncio.gather(*pullDataTasks)
+        print(len(self.pricing_data))
+        
 
     async def lam_quote(self,sqft,multiplier):
 
@@ -469,7 +489,7 @@ class QuoteGenerator:
             lam_levels[lamLevel]['Price'] = get_final_lam_price(sqft_cost)
 
             if "Nonstocked" in lamLevel:
-                wasteMaterialCost = math.ceil(lam_levels[lamLevel]['SheetQty'] * 60 * lam_levels[level]['Cost'] * multiplier)
+                wasteMaterialCost = math.ceil(lam_levels[lamLevel]['SheetQty'] * 60 * lam_levels[lamLevel]['Cost'] * multiplier)
                 print(wasteMaterialCost)
                 lam_levels[lamLevel]['Price'] += wasteMaterialCost
             #laminate minumum $250 check
@@ -552,16 +572,6 @@ class QuoteGenerator:
         return stone_levels
     
 
-    def import_ns_data(self, material):
-        
-        ns_self_edge_data_json = r"jsons\non_stock_lam.json"
-        ns_self_stone_data_json = r"jsons\non_stock_stone.json"
-
-        self.data_jsons = {'NonStocked Self Edge': ns_self_edge_data_json, 'NonStocked Stone': ns_self_stone_data_json}
-        """This imports the pricing structures saved under 'data_json' and saves them as 'self.pricing_data' """
-        print(self.data_jsons[material])
-        with open(self.data_jsons[material],"r") as pricing_data:
-            self.pricing_data[material] = json.load(pricing_data)
 
     def confirm_ns_lam_mat(self,sqft):
             
@@ -628,9 +638,13 @@ class QuoteGenerator:
 
         for i, key in enumerate(self.ns_stone_lbls_dict.keys()):
 
-
+            
             brand, color = key.split(": ")
-            slab_size = self.nonstocked_stone_data[brand][color]['Size']
+            
+
+            #find price level where name is kept
+            level = [key for key, value in self.nonstocked_stone_data[brand].items() if value["Name"] == color][0]
+            slab_size = self.nonstocked_stone_data[brand][level]['Size']
             height = slab_size['Height']
             width = slab_size['Width']
             slabSqft = (height * width) /144
@@ -684,7 +698,7 @@ class QuoteGenerator:
         multiplier = float(self.multiplier_ent.get())
 
         # load pricing data for quote
-        self.import_pricing_data()
+        await self.import_pricing_data()
 
 
 
@@ -731,7 +745,7 @@ class QuoteGenerator:
         # get the sqft from the pdf data
 
         sqft = self.jobData["Total Area"]
-        pricing_levels = await self.lam_quote(sqft,multiplier)#TODO: check on how to add the cost of waste material to the laminate quote. )
+        pricing_levels = await self.lam_quote(sqft,multiplier)
 
 
 
@@ -782,11 +796,11 @@ class QuoteGenerator:
         multiplier = float(self.multiplier_ent.get())
 
         # load pricing data for quote
-        self.import_pricing_data()
+        await self.import_pricing_data()
 
 
 
-        # get the sqft from the pdf data
+        # get the import_ns_datasqft from the pdf data
 
         sqft = self.jobData["Total Area"]
 
@@ -797,13 +811,14 @@ class QuoteGenerator:
 
             i = 0
 
-            self.import_ns_data("NonStocked Stone")
+
+
             self.confirm_ns_stone_mat(sqft)
             for ns_selection in self.requiredSheets: #add async
                 brand,color = ns_selection.split(': ') 
                 brand_data = self.nonstocked_stone_data[brand]
                 for level,data in brand_data.items(): #find color name from brands
-                    if color == level:
+                    if color == data['Name']:
                         price = data['Price'] #saving the price and cost
                         cost = data['Cost']
                         slabHeight,slabWidth = data['Size'].values()
@@ -1110,9 +1125,9 @@ class QuoteGenerator:
             totalTime = endTime-startTime
             print(f'it took {totalTime} to run both print quotes')
         elif self.material == 'Self Edge':
-            asyncio.run(self.printLamQuote(self.material))
+            await self.printLamQuote(self.material)
         else:
-            asyncio.run(self.printStoneQuote(self.material))
+            await self.printStoneQuote(self.material)
     def update_confirm_button_state(self, *args):
         # Callback function to enable/disable the "Confirm" button
         selected_value = self.materialSelection.get()
@@ -1276,7 +1291,7 @@ class QuoteGenerator:
 
     def select_material_to_edit(self):
         self.advanced_window.destroy()
-        self.import_pricing_data()
+        asyncio.run(self.import_pricing_data())
         self.material_price_select_frm = tk.Toplevel()
         self.material_price_select_frm.resizable(False,False)
         self.material_price_select_frm.columnconfigure(0,weight=1)
@@ -1300,7 +1315,7 @@ class QuoteGenerator:
         # window no frame
         self.edit_info_btn_page = tk.Toplevel()
         self.edit_info_btn_page.resizable(False,False)
-        for z, data in enumerate(self.pricing_data):
+        for z, buttonText in enumerate(self.pricing_data):
             self.edit_info_btn_page.rowconfigure(z, weight=1,pad=10)
         self.edit_info_btn_page.columnconfigure(0, weight=1)
         self.edit_info_btn_page.columnconfigure(1, weight=1)
@@ -1309,6 +1324,11 @@ class QuoteGenerator:
         # lsit of buttons for later?
         btns = []
 
+
+        # a dictionary might be a little simpler but this is much more legible imo
+        # button organizer is a framework for the next window to determine which buttons are needed
+        # based on the json data
+        
         if material == 'Self Edge':
             button_organizer = [
                     Material_Level_Button,
@@ -1324,13 +1344,30 @@ class QuoteGenerator:
                     Edge_and_Add_On_Button,
                     Edge_and_Add_On_Button
                 ]
+        elif material == 'Nonstocked Self Edge':
+            button_organizer = [Nonstocked_Self_Edge_Material_Level_Button for _ in self.pricing_data[material]]
+        elif material == 'Nonstocked Stone':
+            button_organizer = [Nonstocked_Stone_Material_Level_Button for _ in self.pricing_data[material]]
+
+
+        #this is a REALLLY short sited work around but it works ¯\_(ツ)_/¯
+        #problem was that nonstocked jsons just have the pricing 
+        #where pricing information in the stocked selections have add_ons, pricing_levels, etc
+
+        if 'Nonstocked' in material:
+            pricingToLoop = {name:pricing for name,pricing in self.pricing_data[material].items()} #put it in a list to be parsed
+        else:
+            pricingToLoop = self.pricing_data[material]
+
+
+
         # make and add buttons to list
-        for z, data in enumerate(self.pricing_data[material]):
+        for z, buttonText in enumerate(pricingToLoop):
 
             crnt_btn = button_organizer[z]
 
             btns.append(crnt_btn(
-                    self.edit_info_btn_page, self.pricing_data,material, self, data
+                    self.edit_info_btn_page, self.pricing_data,material, self, buttonText
                 ))
 
         # pack buttons onto window

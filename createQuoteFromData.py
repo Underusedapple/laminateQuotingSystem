@@ -25,11 +25,6 @@ async def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_
         # Populate granite tiers
         customer_information = pageOneSoup.find(id='customer-information')
     
-        
-
-
-
-
 
         #populate pricing row #this needs to go before pricing
         infoRow = pageOneSoup.new_tag('tr')
@@ -203,76 +198,6 @@ async def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_
         print('hello 6')
         
 
-    async def createPdf(htmlPath):
-        
-        """Takes Html Page after written and converts to pdf"""
-        pdfPath = htmlPath.replace('.html','.pdf')
-        pdfFilePaths.append(pdfPath)
-        pdfkit.from_file(f"{htmlPath}",
-                        pdfPath, 
-                        configuration=pdfkit_config, 
-                        options={  "enable-local-file-access": "",
-                                    "page-size": "A4",
-                                    "margin-top": "1.25in",
-                                    "margin-right": "0.00in",
-                                    "margin-bottom": ".55in",
-                                    "margin-left": "0.00in",
-                                    "header-html": r"pages\header.html",
-                                    "header-spacing" : "0",
-                                    "footer-right": "[page] of [topage]",
-                                    "footer-html": r"pages\footer.html",
-                                    "footer-spacing": "0"})
-        print(f'made pdf page {pdfPath}')
-        #had trouble running the following code in line so adding to create pdf function
-        #runs when both lists are equal lengths
-        if len(pdfFilePaths) == len(htmlFilePaths):
-            #merge outputted pdf and 
-            merger = PdfMerger()
-            for pdfPath in pdfFilePaths:
-                merger.append(fr'{pdfPath}')##add quote to merger
-            merger.append(file_path)##add orginal pdf drawing to merger
-
-
-            #create date
-            todaysDate = date.today().strftime('%m-%d-%Y')
-
-
-            #new path name
-            mergedPDFPath = fr"{folder_path}\{customerName}_{jobName}_{material.replace(' ','_')}_Quote_{todaysDate}.pdf"
-
-            #check for existing path
-            quoteVersion = 1
-            #if file path exists
-            while os.path.exists(mergedPDFPath):
-                if quoteVersion == 1:
-                    mergedPDFPath = mergedPDFPath.replace(".pdf",f"({quoteVersion}).pdf") #change create new file name
-                else:
-                    mergedPDFPath = mergedPDFPath.replace(f"({quoteVersion-1}).pdf",f"({quoteVersion}).pdf") #change create new file name
-
-                quoteVersion += 1
-
-
-
-            #write final quote file
-            merger.write(mergedPDFPath)
-
-            endTime = time.time()
-            executeTime = endTime-startTime
-            print(f'code took {executeTime} to run')
-            merger.close()
-            # for pdfPath in pdfFilePaths:
-            #     os.remove(f'{pdfPath}')
-
-
-            # for htmlPath in htmlFilePaths:
-            #     os.remove(f'{htmlPath}')
-            
-            print(f'starting file {mergedPDFPath}')
-            os.startfile(mergedPDFPath)
-        
-
-
-
     # Get the font size
     def getFontSize(numberOfRows: int, maxFontSize):
         """Returns a px font size based on length of dicitonary with a max font size"""
@@ -284,15 +209,6 @@ async def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_
         else:
             output = maxFontSize - ((numberOfRows - minRows) / minRows) * minRows
         return output
-
-
-
-
-
-
-
-
-
 
 
     #get customer and job informaiton
@@ -389,10 +305,69 @@ async def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_
         htmlFilePaths = [r"pages\pricing_page.html", r"pages\add_on_page.html" ]
         pdfFilePaths = [] #this will be the file paths of the pdfs created
 
-        createPdfTasks = [createPdf(htmlPath) for htmlPath in htmlFilePaths]
+        for htmlPath in htmlFilePaths:  
+            print('task started')
+            """Takes Html Page after written and converts to pdf"""
+            pdfPath = htmlPath.replace('.html','.pdf')
+            pdfFilePaths.append(pdfPath)
+            pdfkit.from_file(f"{htmlPath}",
+                            pdfPath, 
+                            configuration=pdfkit_config, 
+                            options={  "enable-local-file-access": "",
+                                        "page-size": "A4",
+                                        "margin-top": "1.25in",
+                                        "margin-right": "0.00in",
+                                        "margin-bottom": ".55in",
+                                        "margin-left": "0.00in",
+                                        "header-html": r"pages\header.html",
+                                        "header-spacing" : "0",
+                                        "footer-right": "[page] of [topage]",
+                                        "footer-html": r"pages\footer.html",
+                                        "footer-spacing": "0"})
+            print(f'made pdf page {pdfPath}')
+            #had trouble running the following code outside of function so adding to create pdf function
+            #runs when both lists are equal lengths
+            if len(pdfFilePaths) == len(htmlFilePaths):
+                #merge outputted pdf and 
+                merger = PdfMerger()
+                for pdfPath in pdfFilePaths:
+                    merger.append(fr'{pdfPath}')##add quote to merger
+                merger.append(file_path)##add orginal pdf drawing to merger
 
-        await asyncio.gather(*createPdfTasks)
+
+                #create date
+                todaysDate = date.today().strftime('%m-%d-%Y')
+
+
+                #new path name
+                mergedPDFPath = fr"{folder_path}\{customerName}_{jobName}_{material.replace(' ','_')}_Quote_{todaysDate}.pdf"
+
+                #check for existing path
+                quoteVersion = 1
+                #if file path exists
+                while os.path.exists(mergedPDFPath):
+                    if quoteVersion == 1:
+                        mergedPDFPath = mergedPDFPath.replace(".pdf",f"({quoteVersion}).pdf") #change create new file name
+                    else:
+                        mergedPDFPath = mergedPDFPath.replace(f"({quoteVersion-1}).pdf",f"({quoteVersion}).pdf") #change create new file name
+
+                    quoteVersion += 1
 
 
 
-    
+                #write final quote file
+                merger.write(mergedPDFPath)
+
+                endTime = time.time()
+                executeTime = endTime-startTime
+                print(f'code took {executeTime} to run')
+                merger.close()
+                for pdfPath in pdfFilePaths:
+                    os.remove(f'{pdfPath}')
+
+
+                for htmlPath in htmlFilePaths:
+                    os.remove(f'{htmlPath}')
+                
+                print(f'starting file {mergedPDFPath}')
+                os.startfile(mergedPDFPath)

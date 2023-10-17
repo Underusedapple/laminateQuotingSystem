@@ -1,6 +1,6 @@
 {
     "Formica": {
-        "Level1": {
+        "Nonstocked Self Edge_0": {
             "Name": "Formica -58 Finish",
             "Color": [
                 "3496 Belmonte Granite",
@@ -18,27 +18,27 @@
                 "9497 Silver Quartzite"
             ],
             "Price": 10.0,
-            "Cost":2
+            "Cost": 2.0
         },
-        "Level2": {
+        "Nonstocked Self Edge_1": {
             "Name": "Formica Upgrade Finish",
             "Color": [
                 "9277-46 Ouro Romano"
             ],
-            "Price": 11.25
+            "Price": 11.25,
+            "Cost": 2.0
         },
-        "Level3": {
+        "Nonstocked Self Edge_2": {
             "Name": "Formica 180fx Finish",
             "Color": [
                 "3460 Calacatta Marble"
             ],
             "Price": 12.0,
-            "Cost":2
-
+            "Cost": 2.0
         }
     },
-    "Wilsonart" : {
-        "Level1": {
+    "Wilsonart": {
+        "Nonstocked Self Edge_0": {
             "Name": "Wilsonart -38 or -60 Finish",
             "Color": [
                 "4551 Blackstar Granite",
@@ -46,8 +46,7 @@
                 "4924 White Carrara"
             ],
             "Price": 10.75,
-            "Cost":2
-
+            "Cost": 2
         }
     }
 }

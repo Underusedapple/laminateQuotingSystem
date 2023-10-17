@@ -1,61 +1,60 @@
 {
     "MSI": {
-        "Absolute Black": {
+        "Nonstocked Stone_0": {
+            "Name": "Absolute Black",
             "Size": {
-                "Height":60,
+                "Height": 60,
                 "Width": 130
-
             },
             "Price": 30.0,
-            "Cost": 1
+            "Cost": 1.0
         },
-        "Virginia Mist": {
+        "Nonstocked Stone_1": {
+            "Name": "Virginia Mist",
             "Size": {
-                "Height":60,
+                "Height": 60,
                 "Width": 130
-
             },
             "Price": 35.0,
-            "Cost": 1
+            "Cost": 1.0
         },
-        "Fantasy Black": {
+        "Nonstocked Stone_2": {
+            "Name": "Fantasy Black",
             "Size": {
-                "Height":60,
+                "Height": 60,
                 "Width": 130
-
             },
             "Price": 30.0,
-            "Cost": 1
+            "Cost": 1.0
         }
     },
-    "Q Quartz" : {
-        "Quartz 1": {
+    "Q Quartz": {
+        "Nonstocked Stone_0": {
+            "Name": "Quartz 1",
             "Size": {
-                "Height":60,
+                "Height": 60,
                 "Width": 130
-
             },
             "Price": 30.0,
             "Cost": 1
         },
-        "Quartz 2": {
+        "Nonstocked Stone_1": {
+            "Name": "Quartz 2",
             "Size": {
-                "Height":60,
+                "Height": 60,
                 "Width": 130
-
             },
             "Price": 35.0,
             "Cost": 1
         },
-        "Quartz 3": {
+        "Nonstocked Stone_2": {
+            "Name": "Quartz 3",
             "Size": {
-                "Height":60,
+                "Height": 60,
                 "Width": 130
-
             },
             "Price": 30.0,
             "Cost": 1
         }
     }
 }
-
