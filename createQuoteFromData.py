@@ -338,7 +338,7 @@ async def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_
                 #create date
                 todaysDate = date.today().strftime('%m-%d-%Y')
 
-
+                
                 #new path name
                 mergedPDFPath = fr"{folder_path}\{customerName}_{jobName}_{material.replace(' ','_')}_Quote_{todaysDate}.pdf"
 
@@ -362,6 +362,10 @@ async def createQuoteFromData(jobData, stone_dict, edging_dict,folder_path,file_
                 executeTime = endTime-startTime
                 print(f'code took {executeTime} to run')
                 merger.close()
+
+
+
+
                 for pdfPath in pdfFilePaths:
                     os.remove(f'{pdfPath}')
 

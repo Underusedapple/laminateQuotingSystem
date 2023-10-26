@@ -78,12 +78,14 @@ class Nonstocked_Self_Edge_Material_Level_Button(tk.Button):
             newPricing = json.load(pricing_data_json)
 
         #update level pricing
-        newPricing[self.json_locator].update(new_data)
-
-
+        for key in list(newPricing[self.json_locator].keys()):
+            if key in new_data:
+                newPricing[self.json_locator][key] = new_data[key]
+            else:
+                del newPricing[self.json_locator][key]
 
             
-
+        
 
 
         
@@ -124,23 +126,30 @@ class Nonstocked_Self_Edge_Material_Level_Button(tk.Button):
             Multi_data_textbox(self.edit_page_frame, height=3, width=20),
             "",
         ]
+        new_cost_box = [
+            Multi_data_textbox(self.edit_page_frame, height=3, width=20),
+            "",
+        ]
 
         # add them to the lists
         self.stone_level_name_box.append(new_name_box)
-        self.stone_level_color_box.append(
-            new_color_box
-        )  ###this will need to be a button to create individual boxes
+        self.stone_level_color_box.append(new_color_box)
         self.stone_level_price_box.append(new_price_box)
+        self.stone_level_cost_box.append(new_cost_box)
 
         # bind so that tab goes to next window
         new_name_box[0].bind("<Tab>", self.focus_next_window)
         new_color_box[0].bind("<Tab>", self.focus_next_window)
         new_price_box[0].bind("<Tab>", self.focus_next_window)
+        new_cost_box[0].bind("<Tab>", self.focus_next_window)
+        
 
         # grid tboxs to the frame
         new_name_box[0].grid(row=len(self.stone_level_name_box) - 1, column=0)
         new_color_box[0].grid(row=len(self.stone_level_color_box) - 1, column=1)
         new_price_box[0].grid(row=len(self.stone_level_price_box) - 1, column=2)
+        new_cost_box[0].grid(row=len(self.stone_level_cost_box) - 1, column=3)
+
 
 
 
@@ -177,6 +186,8 @@ class Nonstocked_Self_Edge_Material_Level_Button(tk.Button):
 
         # create new window
         self.popup = tk.Toplevel()
+        self.popup.iconbitmap(r'icon\app.ico')
+
         # self.popup.resizable(False, False)
         self.popup.title("TextBox Input")
 
@@ -270,8 +281,13 @@ class Nonstocked_Self_Edge_Material_Level_Button(tk.Button):
             "Price",
             "Cost"
         ]  # used to parse through individual stone level data
+
+        for i,label in enumerate(input_parser):
+            tk.Label(self.edit_page_frame,text=label).grid(row=0,column=i)
+
+
         for y, list_of_tbox in enumerate(self.stone_level_textboxes):
-            x = 0
+            x = 1
 
             for tbox, input in list_of_tbox:
                 # at this point json_data is the stone_levels

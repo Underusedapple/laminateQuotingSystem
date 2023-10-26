@@ -1,31 +1,36 @@
 {
     "MSI": {
         "Nonstocked Stone_0": {
-            "Name": "Absolute Black",
+            "Name": "Five",
             "Size": {
-                "Height": 60,
-                "Width": 130
+                "Height": 60.0,
+                "Width": 144.0
             },
-            "Price": 30.0,
-            "Cost": 1.0
+            "Price": 5.0
         },
         "Nonstocked Stone_1": {
-            "Name": "Virginia Mist",
+            "Name": "Fifteen",
             "Size": {
-                "Height": 60,
-                "Width": 130
+                "Height": 60.0,
+                "Width": 144.0
             },
-            "Price": 35.0,
-            "Cost": 1.0
+            "Price": 15.0
         },
         "Nonstocked Stone_2": {
-            "Name": "Fantasy Black",
+            "Name": "Twenty Five",
             "Size": {
-                "Height": 60,
-                "Width": 130
+                "Height": 60.0,
+                "Width": 144.0
             },
-            "Price": 30.0,
-            "Cost": 1.0
+            "Price": 25.0
+        },
+        "Nonstocked Stone_3": {
+            "Name": "test",
+            "Size": {
+                "Height": 100.0,
+                "Width": 100.0
+            },
+            "Price": 100.0
         }
     },
     "Q Quartz": {

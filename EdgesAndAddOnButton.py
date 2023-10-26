@@ -25,7 +25,7 @@ class Edge_and_Add_On_Button(tk.Button):
     def submit_cmd(self):
         # command for the submitbutton
 
-        new_data = {}  # data stored in dictionary
+        newPricing = {}  # data stored in dictionary
         # loop through the buttons stored in lists using one list to iterate
         for x, txtbox_list in enumerate(self.name_tboxes):
             # get level name and remove white space
@@ -36,10 +36,14 @@ class Edge_and_Add_On_Button(tk.Button):
             level_price = float(self.price_tboxes[x][0].get("1.0", tk.END).strip())
 
             # store that data using the iterator to name them individually
-            new_data[level_name] = level_price
+            newPricing[level_name] = level_price
 
         # update pricing data
-        self.pricing_data[self.json_locator] = new_data
+        for key in list(newPricing[self.json_locator].keys()):
+            if key in newPricing:
+                newPricing[self.json_locator][key] = newPricing[key]
+            else:
+                del newPricing[self.json_locator][key]
 
         # update json (i currently have it rewriting all data just for simplicity, could only update the pricing data for effeciency)
         dumped_new_data = json.dumps(self.pricing_data, indent=4)
@@ -50,7 +54,7 @@ class Edge_and_Add_On_Button(tk.Button):
         with open(self.main.data_jsons[self.material], "r") as pricing_data_json:
             pricing_data = json.load(pricing_data_json)
 
-        if pricing_data[self.json_locator] == new_data:
+        if pricing_data[self.json_locator] == newPricing:
             messagebox.showinfo("Data Saved", "Data saved successfully.")
         else:
             messagebox.showinfo(
@@ -165,6 +169,8 @@ class Edge_and_Add_On_Button(tk.Button):
 
         # create new window
         self.popup = tk.Toplevel()
+        self.popup.iconbitmap(r'icon\app.ico')
+
         self.popup.resizable(False,False)
         self.popup.title("TextBox Input")
 
@@ -229,8 +235,14 @@ class Edge_and_Add_On_Button(tk.Button):
             self.name_tboxes.append(new_name_box)
             self.price_tboxes.append(new_price_box)
 
+
+
+
+        nameLabel = tk.Label(self.edit_page_frame, text = "Name").grid(row=0,column=0)
+        priceLabel = tk.Label(self.edit_page_frame, text = "Price").grid(row=0,column=1)
+
         for y, list_of_tbox in enumerate(self.tbox_lists):
-            x = 0
+            x = 1
 
             for tbox, input in list_of_tbox:
 

@@ -41,6 +41,7 @@ class QuoteGenerator:
         self.labels = {'Self Edge':[],'Stone':[]}
         #create master frame
         self.master = master
+        self.master.iconbitmap(r'icon\app.ico')
 
         self.master.rowconfigure(0, weight=2)
         self.master.rowconfigure(1, weight=1)
@@ -176,7 +177,7 @@ class QuoteGenerator:
 
         #create window
         self.non_stocked_stone_selector = tk.Toplevel()
-
+        self.non_stocked_stone_selector.iconbitmap(r'icon\app.ico')
 
 
 
@@ -308,6 +309,7 @@ class QuoteGenerator:
 
         #create window
         self.non_stocked_lam_selector = tk.Toplevel()
+        self.non_stocked_lam_selector.iconbitmap(r'icon\app.ico')
 
 
 
@@ -484,12 +486,16 @@ class QuoteGenerator:
 
 
         async def getLamPrice(lamLevel):
-            sqft_cost = lam_levels[lamLevel]['Price'] #prettify the get final price
+            sqftPrice = lam_levels[lamLevel]['Price'] #prettify the get final price
 
-            lam_levels[lamLevel]['Price'] = get_final_lam_price(sqft_cost)
+            lam_levels[lamLevel]['Price'] = get_final_lam_price(sqftPrice)
 
             if "Nonstocked" in lamLevel:
-                wasteMaterialCost = math.ceil(lam_levels[lamLevel]['SheetQty'] * 60 * lam_levels[lamLevel]['Cost'] * multiplier)
+                totalSheetsSqft = lam_levels[lamLevel]['SheetQty'] * 60
+                wasteMaterial = totalSheetsSqft - sqft
+                sheetCost = lam_levels[lamLevel]['Cost']
+                print(f'{sqft}sqft of material with {wasteMaterial}sqft of waste')
+                wasteMaterialCost = math.ceil(wasteMaterial * sheetCost * multiplier)
                 print(wasteMaterialCost)
                 lam_levels[lamLevel]['Price'] += wasteMaterialCost
             #laminate minumum $250 check
@@ -523,27 +529,26 @@ class QuoteGenerator:
 
         
         # lambda for getting our list price of stone without add-ons
-        get_stone_cost = lambda material_sqft_cost: math.ceil(
-            (sqft * fabrication_cost) + (((sqft * 1.25) * material_sqft_cost) / mark_up)
-        )
-        #lambda for getting final price of stone by getting stone cost, adding in add-ons
-        #multiplying by 2 and then multiply by customer multiplier
-        get_final_stone_price = lambda material_sqft_cost: math.ceil(
-                ((get_stone_cost(material_sqft_cost) + sum(add_on_price.values())) * 2) * multiplier)
-        
+
+        # get_stone_cost = lambda material_sqft_cost: math.ceil(
+        #     (sqft * fabrication_cost) + (((sqft * 1.25) * material_sqft_cost) / mark_up)
+        # )
+
+
+
+
+
 
         # takes the entries for the quantities of add-ons and multiplies it by the preset values to get costs of add-ons
         add_on_price = {key: add_ons[key] * self.stoneAddOnQuants[key] for key in add_ons}
 
-        #change dictionary of levels to also have a price?
-
 
 
         async def getStonePrice(stone_level):
+            shippingCharge = 300
 
             sqft_cost = stone_levels[stone_level]['Price'] #prettify the get final price
 
-            stone_levels[stone_level]['Price'] = get_final_stone_price(sqft_cost)
 
 
 
@@ -551,22 +556,30 @@ class QuoteGenerator:
             if "Nonstocked" in stone_level: 
                 qtySlabs = stone_levels[stone_level]['SheetQty']
                 slabSqft = stone_levels[stone_level]['SlabSqft']
-                cost = stone_levels[stone_level]['Cost']
+                materialSqft = qtySlabs * slabSqft
+            else:
+                materialSqft = sqft *1.25
 
-                wasteMaterialCost = math.ceil((qtySlabs * slabSqft * cost * 2 * multiplier) / mark_up )
-                print(wasteMaterialCost)
-                stone_levels[stone_level]['Price'] += wasteMaterialCost
-            #laminate minumum $250 check
-            #TODO: 10-4-23 rework how stone check for non-stocks like here in the laminate quote
-            sqft
-            if sqft < 25:
-                fullCharge = self.pricing_data['Stone']['add_ons']['trip_charge'] * 2 * multiplier
-                actualCharge = (25 - sqft)/10 * fullCharge #full charge is prorated at 25sqft to 15sqft 
-                stone_levels[stone_level]['Price'] += actualCharge
+
+            #get price for just stone
+            stoneOnlyPrice = (sqft * fabrication_cost) + ((materialSqft * sqft_cost) / mark_up)
+            
+            #add in cost of add-ons
+            stoneAndAddOnPrice =  stoneOnlyPrice + sum(add_on_price.values())
+            
+            #add shipping charge if non-stocked
+            if "Nonstocked" in stone_level: 
+                stoneAndAddOnPrice += shippingCharge
+            
+            #get final price
+            finalPrice = math.ceil(stoneAndAddOnPrice * 2 * multiplier)
+            
+            #add price to data
+            stone_levels[stone_level]['Price'] = finalPrice
 
 
         stonePricingTasks = [getStonePrice(stone_level) for stone_level in stone_levels]
-
+        
         await asyncio.gather(*stonePricingTasks)
 
         return stone_levels
@@ -584,6 +597,7 @@ class QuoteGenerator:
         #Create Window
         self.ns_mat_window = tk.Toplevel()
         self.ns_mat_window.title("Frame Viewer")
+        self.ns_mat_window.iconbitmap(r'icon\app.ico')
 
         #create canvas to put scroll bar and widgets
         canvas = tk.Canvas(self.ns_mat_window)
@@ -614,7 +628,7 @@ class QuoteGenerator:
 
 
     def submit_ns_lam_mat(self):
-        self.requiredSheets = {key: int(self.entryWidgetDict[key].get()) for key in self.entryWidgetDict}
+        self.requiredLamSheets = {key: int(self.entryWidgetDict[key].get()) for key in self.entryWidgetDict}
         self.ns_mat_window.destroy()
 
     def confirm_ns_stone_mat(self,sqft):
@@ -626,6 +640,7 @@ class QuoteGenerator:
         #Create Window
         self.ns_mat_window = tk.Toplevel()
         self.ns_mat_window.title("Frame Viewer")
+        self.ns_mat_window.iconbitmap(r'icon\app.ico')
 
         #create canvas to put scroll bar and widgets
         canvas = tk.Canvas(self.ns_mat_window)
@@ -671,12 +686,11 @@ class QuoteGenerator:
 
 
     def submit_ns_stone_mat(self):
-        self.requiredSheets = {key: int(self.entryWidgetDict[key].get()) for key in self.entryWidgetDict}
+        self.requiredStoneSheets = {key: int(self.entryWidgetDict[key].get()) for key in self.entryWidgetDict}
         self.ns_mat_window.destroy()
 
 
     async def printLamQuote(self, material):#TODO: create this into two seperate functions so they can run simeltaenously
-
         # create a dictionary of the entries with the corresponding names
         self.lamAddOnQuants = {v._name: int(v.get()) for v in self.entries[material]}
 
@@ -714,7 +728,7 @@ class QuoteGenerator:
             i = 0
 
 
-            for ns_selection in self.requiredSheets:
+            for ns_selection in self.requiredLamSheets:
                 brand,color = ns_selection.split(': ') 
                 brand_data = self.nonstocked_lam_data[brand]
                 for level,data in brand_data.items():
@@ -722,17 +736,17 @@ class QuoteGenerator:
                         price = data['Price']
                         cost = data['Cost']
                 # if price not in pricing data do this
-                    for name, lData in self.pricing_data['Self Edge']['lam_levels'].items():
-                        if "Nonstocked" in name and price == lData['Price']:
-                            self.pricing_data['Self Edge']['lam_levels'][name]['Color'].append(color)
-                            break
-                    else:
-                        self.pricing_data['Self Edge']['lam_levels'][f'Nonstocked {i}'] = {'Name': f'Nonstocked {brand}',
-                                                                                 'Color': [color],
-                                                                                 'Price': price,
-                                                                                 'Cost': cost,
-                                                                                 'SheetQty': self.requiredSheets[ns_selection]
-                                                                                 }
+                        for name, lData in self.pricing_data['Self Edge']['lam_levels'].items():
+                            if "Nonstocked" in name and price == lData['Price']:
+                                self.pricing_data['Self Edge']['lam_levels'][name]['Color'].append(color)
+                                break
+                        else:
+                            self.pricing_data['Self Edge']['lam_levels'][f'Nonstocked {i}'] = {'Name': f'Nonstocked {brand}',
+                                                                                    'Color': [color],
+                                                                                    'Price': price,
+                                                                                    'Cost': cost,
+                                                                                    'SheetQty': self.requiredLamSheets[ns_selection]
+                                                                                    }
                 #else add to existing level
                     i += 1
 
@@ -814,13 +828,13 @@ class QuoteGenerator:
 
 
             self.confirm_ns_stone_mat(sqft)
-            for ns_selection in self.requiredSheets: #add async
+            for ns_selection in self.requiredStoneSheets: #add async
                 brand,color = ns_selection.split(': ') 
                 brand_data = self.nonstocked_stone_data[brand]
                 for level,data in brand_data.items(): #find color name from brands
                     if color == data['Name']:
-                        price = data['Price'] #saving the price and cost
-                        cost = data['Cost']
+                        price = data['Price'] #saving the price
+                        cost = data['Price']#flag
                         slabHeight,slabWidth = data['Size'].values()
                         slabSqft = (slabHeight * slabWidth)/144
                         break
@@ -829,8 +843,8 @@ class QuoteGenerator:
                 self.pricing_data['Stone']['stone_levels'][f'Nonstocked {i}'] = {'Name': f'Nonstocked {brand}',
                                                                                     'Color': [color],
                                                                                     'Price': price,
-                                                                                    'Cost': cost,
-                                                                                    'SheetQty': self.requiredSheets[ns_selection],
+                                                                                    'Cost': cost,#flag
+                                                                                    'SheetQty': self.requiredStoneSheets[ns_selection],
                                                                                     'SlabSqft': slabSqft #stone slabs come in custom sizes so you have to calculate sqft
                                                                                     }
 
@@ -905,7 +919,7 @@ class QuoteGenerator:
             self.multiplier_ent.focus_set()
         if (
             re.fullmatch(r"^[0]?[.][0-9][0-9]?[0-9]?$", str(input))
-            and 0.5 < input < 0.8
+            and 0.5 <= input <= 0.8
         ):
             return True
         messagebox.showerror(
@@ -918,32 +932,19 @@ class QuoteGenerator:
         """Selects entire entry in widget"""
         event.widget.select_range(0, tk.END)
 
-    def search_file(self,*args):
+    def search_file(self):
 
-        # TODO: Delete args, just for ease of practice use
-        if args:
-            if os.environ['COMPUTERNAME'] == 'GREGORYLEE':
-                self.filepath = r"W:\Ashton\Daniel_Tusing_Job\Pages\Daniel_Tusing_Job_P1.pdf"
-                self.folderpath = r"W:\Ashton\Daniel_Tusing_Job\Pages"
-            else:
-                self.filepath = r"C:\Users\hump_\OneDrive\Documents\GitHub\laminateQuotingSystem\Pricing_Testing_Job.pdf"
-                self.folderpath = r"C:\Users\hump_\OneDrive\Documents\GitHub\laminateQuotingSystem"
+
+
+        """Parses PDF file after selection and calls get_pdf_data to parse and save the data"""
+        file = fd.askopenfile(mode="r", filetypes=[("PDF Files", "*.pdf")])
+        if file:
+            self.filepath = os.path.abspath(file.name)
+            self.folderpath = "\\".join(self.filepath.split("\\")[0:-1])
 
             self.jobData = extractDataFromPdf(self.filepath)
             self.file_select_text["text"
             ] = f"{self.jobData['Job Name']} for {self.jobData['Customer Name']} is currently selected"
-        else:
-
-
-            """Parses PDF file after selection and calls get_pdf_data to parse and save the data"""
-            file = fd.askopenfile(mode="r", filetypes=[("PDF Files", "*.pdf")])
-            if file:
-                self.filepath = os.path.abspath(file.name)
-                self.folderpath = "\\".join(self.filepath.split("\\")[0:-1])
-
-                self.jobData = extractDataFromPdf(self.filepath)
-                self.file_select_text["text"
-                ] = f"{self.jobData['Job Name']} for {self.jobData['Customer Name']} is currently selected"
             
 
 
@@ -1075,14 +1076,10 @@ class QuoteGenerator:
         # create a dictionary of the entries with the corresponding names
         entry_check = 0
 
-        # self.material_selection_window.rowconfigure()
-
-        # lamCheckBox = tk.Checkbutton(self.material_selection_window, text="Self Edge")
-        # lamCheckBox.pack()
-        # stoneCheckBox = tk.Checkbutton(self.material_selection_window, text = "Stone")
-        # stoneCheckBox.pack()    
+ 
         self.material_selection_window = tk.Toplevel()
         self.materialSelection = tk.StringVar()
+        self.material_selection_window.iconbitmap(r'icon\app.ico')
         
         # Create radio buttons
         selfEdgeRadial = tk.Radiobutton(self.material_selection_window, text='Self Edge', variable=self.materialSelection, value='Self Edge')
@@ -1106,12 +1103,14 @@ class QuoteGenerator:
         self.material_selection_window.mainloop()
     
     async def runPrintQuote(self):
+        await self.import_pricing_data()
         self.material = self.materialSelection.get()
 
         if not self.material:
             messagebox.showerror("No Selection", "No selection made. Please make a selection.")
             return
 
+        self.folderpath = fd.askdirectory(initialdir=self.folderpath, title="Select a Folder")
 
         
         if self.material == "Both":
@@ -1177,6 +1176,7 @@ class QuoteGenerator:
 
 
         self.advanced_window = tk.Toplevel()   
+        self.advanced_window.iconbitmap(r'icon\app.ico')
         self.advanced_window.resizable(False,False)
         self.advanced_window.rowconfigure(0,weight=1,pad=10)
         self.advanced_window.rowconfigure(1,weight=1,pad=10)
@@ -1258,6 +1258,7 @@ class QuoteGenerator:
 
 
         self.edit_pswrd_frame = tk.Toplevel()
+        self.edit_pswrd_frame.iconbitmap(r'icon\app.ico')
         self.edit_pswrd_frame.resizable(False,False)
         old_password_lbl = tk.Label(
             self.edit_pswrd_frame, text="Enter your old password:"
@@ -1293,6 +1294,7 @@ class QuoteGenerator:
         self.advanced_window.destroy()
         asyncio.run(self.import_pricing_data())
         self.material_price_select_frm = tk.Toplevel()
+        self.material_price_select_frm.iconbitmap(r'icon\app.ico')
         self.material_price_select_frm.resizable(False,False)
         self.material_price_select_frm.columnconfigure(0,weight=1)
         for n,material in enumerate(self.pricing_data):
@@ -1314,6 +1316,7 @@ class QuoteGenerator:
 
         # window no frame
         self.edit_info_btn_page = tk.Toplevel()
+        self.edit_info_btn_page.iconbitmap(r'icon\app.ico')
         self.edit_info_btn_page.resizable(False,False)
         for z, buttonText in enumerate(self.pricing_data):
             self.edit_info_btn_page.rowconfigure(z, weight=1,pad=10)
@@ -1346,11 +1349,12 @@ class QuoteGenerator:
                 ]
         elif material == 'Nonstocked Self Edge':
             button_organizer = [Nonstocked_Self_Edge_Material_Level_Button for _ in self.pricing_data[material]]
+            button_organizer.append(Nonstocked_Self_Edge_Material_Level_Button)
         elif material == 'Nonstocked Stone':
             button_organizer = [Nonstocked_Stone_Material_Level_Button for _ in self.pricing_data[material]]
 
 
-        #this is a REALLLY short sited work around but it works ¯\_(ツ)_/¯
+        #this is a REALLLY short sighted work around but it works ¯\_(ツ)_/¯
         #problem was that nonstocked jsons just have the pricing 
         #where pricing information in the stocked selections have add_ons, pricing_levels, etc
 

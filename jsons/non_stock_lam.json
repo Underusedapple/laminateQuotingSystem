@@ -17,24 +17,24 @@
                 "7734 Jamocha Granite",
                 "9497 Silver Quartzite"
             ],
-            "Price": 10.0,
-            "Cost": 2.0
+            "Price": 10.78,
+            "Cost": 4.0
         },
         "Nonstocked Self Edge_1": {
             "Name": "Formica Upgrade Finish",
             "Color": [
                 "9277-46 Ouro Romano"
             ],
-            "Price": 11.25,
-            "Cost": 2.0
+            "Price": 11.11,
+            "Cost": 4.0
         },
         "Nonstocked Self Edge_2": {
             "Name": "Formica 180fx Finish",
             "Color": [
                 "3460 Calacatta Marble"
             ],
-            "Price": 12.0,
-            "Cost": 2.0
+            "Price": 11.89,
+            "Cost": 6.0
         }
     },
     "Wilsonart": {

@@ -58,6 +58,8 @@ class Fab_Cost_Mark_Up_button(tk.Button):
 
         # create new window
         self.popup = tk.Tk()
+        self.popup.iconbitmap(r'icon\app.ico')
+
         self.popup.resizable(False,False)
         self.popup.title("TextBox Input")
 

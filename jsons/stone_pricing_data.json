@@ -1,8 +1,8 @@
 {
-    "fabrication_cost": 17.0,
+    "fabrication_cost": 18.0,
     "mark_up": 0.7,
     "stone_levels": {
-        "Self Edge_0": {
+        "Stone_0": {
             "Name": "Granite Level 1",
             "Color": [
                 "Azul Platino",
@@ -12,7 +12,7 @@
             ],
             "Price": 7.5
         },
-        "Self Edge_1": {
+        "Stone_1": {
             "Name": "Granite Level 2",
             "Color": [
                 "Fantasy Brown",
@@ -22,7 +22,7 @@
             ],
             "Price": 10.0
         },
-        "Self Edge_2": {
+        "Stone_2": {
             "Name": "Granite Level 3",
             "Color": [
                 "Nero Mist Honed",
@@ -32,35 +32,40 @@
             ],
             "Price": 12.0
         },
-        "Self Edge_3": {
+        "Stone_3": {
             "Name": "Quartz Level 1",
             "Color": [
                 "Frost White",
-                "Iced White",
-                "Peppercorn White"
+                "Iced White"
             ],
-            "Price": 17.0
+            "Price": 13.0
         },
-        "Self Edge_4": {
+        "Stone_4": {
             "Name": "Quartz Level 2",
             "Color": [
-                "Carrara Grigio",
                 "Carrara Mist",
                 "Fossil Gray"
             ],
-            "Price": 22.5
+            "Price": 15.0
         },
-        "Self Edge_5": {
-            "Name": "Quartz Level 3",
+        "Stone_5": {
+            "Name": "Quartz Level 3-A",
             "Color": [
-                "Babylon Gray",
                 "Calacatta Classique",
                 "Calacatta Vicenza",
                 "Gray Lagoon"
             ],
-            "Price": 25.5
+            "Price": 18.0
         },
-        "Self Edge_6": {
+        "Stone_6": {
+            "Name": "Quartz Level 3-B",
+            "Color": [
+                "Babylon Gray",
+                "Soapstone Metropolis Polished"
+            ],
+            "Price": 22.0
+        },
+        "Stone_7": {
             "Name": "Quartz Level 4",
             "Color": [
                 "Calacatta Miraggio",
@@ -68,7 +73,7 @@
                 "Calacatta Miraggio Duo",
                 "Calacatta Miraggio Gold"
             ],
-            "Price": 32.0
+            "Price": 32.03
         }
     },
     "edge_pricing": {

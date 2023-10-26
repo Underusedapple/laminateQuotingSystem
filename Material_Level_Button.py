@@ -71,8 +71,11 @@ class Material_Level_Button(tk.Button):
             newPricing = json.load(pricing_data_json)
 
         #update level pricing
-        newPricing[self.json_locator].update(new_data)
-
+        for key in list(newPricing[self.json_locator].keys()):
+            if key in new_data:
+                newPricing[self.json_locator][key] = new_data[key]
+            else:
+                del newPricing[self.json_locator][key]
 
 
             
@@ -168,6 +171,7 @@ class Material_Level_Button(tk.Button):
 
         # create new window
         self.popup = tk.Toplevel()
+        self.popup.iconbitmap(r'icon\app.ico')
         self.popup.resizable(False, False)
         self.popup.title("TextBox Input")
 
@@ -249,8 +253,13 @@ class Material_Level_Button(tk.Button):
             "Color",
             "Price",
         ]  # used to parse through individual stone level data
+
+        for i,label in enumerate(input_parser):
+            tk.Label(self.edit_page_frame,text=label).grid(row=0,column=i)
+
+
         for y, list_of_tbox in enumerate(self.stone_level_textboxes):
-            x = 0
+            x = 1
 
             for tbox, input in list_of_tbox:
                 # at this point json_data is the stone_levels
