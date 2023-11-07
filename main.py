@@ -537,7 +537,11 @@ class QuoteGenerator:
 
 
 
-
+        if sqft < 25:
+            #prorated quanitity for trip charge
+            minSqftCharge = math.ceil((25-sqft)/10)
+            #add prorated trip charge quanity to add-ons
+            self.stoneAddOnQuants['trip_charge'] += minSqftCharge
 
         # takes the entries for the quantities of add-ons and multiplies it by the preset values to get costs of add-ons
         add_on_price = {key: add_ons[key] * self.stoneAddOnQuants[key] for key in add_ons}

@@ -35,31 +35,28 @@
     },
     "Q Quartz": {
         "Nonstocked Stone_0": {
-            "Name": "Quartz 1",
+            "Name": "Calacatta Valentin",
             "Size": {
-                "Height": 60,
-                "Width": 130
+                "Height": 63.0,
+                "Width": 126.0
             },
-            "Price": 30.0,
-            "Cost": 1
+            "Price": 36.0
         },
         "Nonstocked Stone_1": {
             "Name": "Quartz 2",
             "Size": {
-                "Height": 60,
-                "Width": 130
+                "Height": 60.0,
+                "Width": 130.0
             },
-            "Price": 35.0,
-            "Cost": 1
+            "Price": 35.0
         },
         "Nonstocked Stone_2": {
             "Name": "Quartz 3",
             "Size": {
-                "Height": 60,
-                "Width": 130
+                "Height": 60.0,
+                "Width": 130.0
             },
-            "Price": 30.0,
-            "Cost": 1
+            "Price": 30.0
         }
     }
 }

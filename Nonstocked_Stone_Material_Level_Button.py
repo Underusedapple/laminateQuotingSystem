@@ -233,7 +233,7 @@ class Nonstocked_Stone_Material_Level_Button(tk.Button):
             self.stone_level_price_box
         ]
 
-        for input in json_data[self.json_locator]:
+        for input in json_data:
 
 
             # make tboxs as variables
@@ -288,9 +288,9 @@ class Nonstocked_Stone_Material_Level_Button(tk.Button):
                 # and y is simultaneously used for the input parser and column since all Name boxes are column 1, Colors column 2, and Pricing Column 3
 
                 if y in [1,2]:
-                    tbox_label = str(json_data[self.json_locator][input]['Size'][input_parser[y]])
+                    tbox_label = str(json_data[input]['Size'][input_parser[y]])
                 else:
-                    tbox_label = str(json_data[self.json_locator][input][input_parser[y]])
+                    tbox_label = str(json_data[input][input_parser[y]])
 
                 print(tbox_label)
                 tbox_label = (
