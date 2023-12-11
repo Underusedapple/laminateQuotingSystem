@@ -539,7 +539,8 @@ class QuoteGenerator:
 
         if sqft < 25:
             #prorated quanitity for trip charge
-            minSqftCharge = math.ceil((25-sqft)/10)
+            minSqftCharge = min(1,math.ceil((25-sqft)/10)) #min guarantees the value will never be greater than 1 
+
             #add prorated trip charge quanity to add-ons
             self.stoneAddOnQuants['trip_charge'] += minSqftCharge
 
@@ -600,7 +601,7 @@ class QuoteGenerator:
 
         #Create Window
         self.ns_mat_window = tk.Toplevel()
-        self.ns_mat_window.title("Frame Viewer")
+        self.ns_mat_window.title("Laminate Sheet Qty Confirmation")
         self.ns_mat_window.iconbitmap(r'icon\app.ico')
 
         #create canvas to put scroll bar and widgets
@@ -643,7 +644,7 @@ class QuoteGenerator:
 
         #Create Window
         self.ns_mat_window = tk.Toplevel()
-        self.ns_mat_window.title("Frame Viewer")
+        self.ns_mat_window.title("Stone Slab Qty Confirmation")
         self.ns_mat_window.iconbitmap(r'icon\app.ico')
 
         #create canvas to put scroll bar and widgets
