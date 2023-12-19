@@ -238,9 +238,8 @@ class QuoteGenerator:
 
     def check_multiplier(self, event):
         """Regex check for a valid multiplier"""
-        input = self.multiplier_ent.get()
 
-        if input == "":
+        if (input := self.multiplier_ent.get()) == "":
             return True
 
         try:

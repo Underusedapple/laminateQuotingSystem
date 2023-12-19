@@ -137,10 +137,9 @@ class Edge_and_Add_On_Button(tk.Button):
     def validate_ent(self, event):
         """Checks for numerical inputs only"""
 
-        char = event.char
 
         # pass the backspace key
-        if char == "\x08":
+        if (char := event.char) == "\x08":
             return True
 
         input = event.widget.get("1.0", tk.END)
