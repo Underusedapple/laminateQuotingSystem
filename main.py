@@ -1,6 +1,6 @@
 # TODO:add option for job name, auto pull from pdf file but allow person to overwrite the job name
 # TODO: create a Focus out ont he entries that if left empty they revert to '0' (around line 365)
-
+# TODO: Create a "sign-in" function. Use logins to store default file paths for drawings and save locations. Create a button for submitting the default locations
 
 import time
 import json
@@ -27,18 +27,26 @@ class QuoteGenerator:
         """Application used for quoting stocked materials from drawings """
         
 
+        #pricingState to prevent a post-form drawing being priced as something else (and vice versa)
+        #post-form is price linearly where all other materials are priced by sqft
+        #to prevent this issue tabs are disabled pending the correct material layout
+        self.pricingState = 'standard' #alternate option is postform
+
+
         # self.main = main
         asyncio.run(self.import_pricing_data())  # pull pricing data
         
         self.ns_stone_lbls_dict = {}
         self.ns_lam_lbls_dict = {}
+        self.ns_pf_lbls_dict = {}
+
         self.color_selection_default = 'No selection made'
 
 
         
         # lists of entries and labels for later use
-        self.entries = {'Self Edge':[],'Stone':[]}
-        self.labels = {'Self Edge':[],'Stone':[]}
+        self.entries = {'Self Edge':[],'Stone':[],'Postform':[]}
+        self.labels = {'Self Edge':[],'Stone':[],'Postform':[]}
         #create master frame
         self.master = master
         self.master.iconbitmap(r'icon\app.ico')
@@ -48,7 +56,7 @@ class QuoteGenerator:
         self.master.rowconfigure(2, weight=5)
         self.master.rowconfigure(3, weight=1)
         self.master.columnconfigure(0, weight=1)
-        self.master.geometry("700x600")
+        self.master.geometry("800x200")
         self.master.resizable(False, False)
 
 
@@ -80,6 +88,7 @@ class QuoteGenerator:
         self.add_on_frm = tk.Frame(master=self.master, relief=tk.SUNKEN, borderwidth=2)
         
         self.pricingTabControl = ttk.Notebook(self.add_on_frm)
+        
 
         #create self edge tab for add-on frame and non stock frame
         self.self_edge_tab = ttk.Frame(self.pricingTabControl)
@@ -113,9 +122,22 @@ class QuoteGenerator:
 
         non_stock_stone_btn = ttk.Button(self.stone_non_stocked_frm,text='Add Non-Stocked Stone Selection',command=self.add_non_stocked_stone_cmd).pack() 
 
+        #create postform tab for add-on frame and non-stocked frame 
+        self.postform_tab = ttk.Frame(self.pricingTabControl)
+        self.postform_tab.rowconfigure(0,weight=2)
+        self.postform_tab.rowconfigure(1,weight=1)
+        self.postform_tab.columnconfigure(0,weight=1)
+        #add on frame
+        self.postform_add_on_frm = ttk.Frame(self.postform_tab,relief=tk.RAISED)
+        self.postform_add_on_frm.grid(row=0,column=0, sticky='nsew',pady=3,padx=2)
+        #non-stocked frame
+        self.postform_non_stocked_frm = ttk.Frame(self.postform_tab)
+        self.postform_non_stocked_frm.grid(row=1,column=0, sticky='nsew')
 
 
-        self.pricingTabs = { 'Self Edge':self.self_edge_add_on_frm, 'Stone': self.stone_add_on_frm }
+        non_stock_postform_btn = ttk.Button(self.postform_non_stocked_frm,text='Add Non-Stocked Laminate Selection',command=self.add_non_stocked_pf_cmd).pack()
+
+        self.pricingTabs = { 'Self Edge':self.self_edge_add_on_frm, 'Stone': self.stone_add_on_frm,'Postform':self.postform_add_on_frm }
 
         # self.pricingTabControl.bind("<ButtonRelease-1>", self.set_material)
 
@@ -126,13 +148,18 @@ class QuoteGenerator:
 
         self.pricingTabControl.add(self.self_edge_tab,text= "Self-Edge")
         self.pricingTabControl.add(self.stone_tab,text= "Stone")
+        self.pricingTabControl.add(self.postform_tab,text= "Postform")
+
+        for i,tab in enumerate(self.pricingTabs):
+            self.pricingTabControl.tab(i,state = 'disabled')
     
-        self.pricingTabControl.pack(expand=1,fill= 'both')
+        # self.pricingTabControl.pack(expand=1,fill= 'both')
 
         self.load_add_on_frame(self.stone_add_on_frm,'Stone')
 
         self.load_add_on_frame(self.self_edge_add_on_frm,'Self Edge')
         
+        self.load_add_on_frame(self.postform_add_on_frm, 'Postform')
 
         self.add_on_frm.grid(
             row=2, column=0, sticky="news"
@@ -234,9 +261,9 @@ class QuoteGenerator:
 
 
 
-        self.ns_stone_brand.trace("w",lambda name,index,mode, brand = self.ns_stone_brand:self.load_stone_colors(brand))
+        self.ns_stone_brand.trace_add("write",lambda name,index,mode, brand = self.ns_stone_brand:self.load_stone_colors(brand))
 
-        self.ns_stone_color.trace("w",lambda name,index,mode: self.load_ns_stone_selection())
+        self.ns_stone_color.trace_add("write",lambda name,index,mode: self.load_ns_stone_selection())
 
         
 
@@ -359,9 +386,9 @@ class QuoteGenerator:
 
 
 
-        self.ns_lam_brand.trace("w",lambda name,index,mode, brand = self.ns_lam_brand:self.load_lam_colors(brand))
+        self.ns_lam_brand.trace_add("write",lambda name,index,mode, brand = self.ns_lam_brand:self.load_lam_colors(brand))
 
-        self.ns_lam_color.trace("w",lambda name,index,mode: self.load_ns_lam_selection())
+        self.ns_lam_color.trace_add("write",lambda name,index,mode: self.load_ns_lam_selection())
 
         
 
@@ -403,6 +430,8 @@ class QuoteGenerator:
             messagebox.showerror("Error Submitting Non-Stocked Selection", "Selection Already Made")
 
 
+
+
     def delete_ns_lam_row(self,selection):
 
         self.ns_lam_lbls_dict[selection].destroy()
@@ -433,6 +462,165 @@ class QuoteGenerator:
         self.check_ns_lam_label()
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    def add_non_stocked_pf_cmd(self):
+        """This imports the pricing structures saved under 'data_json' and saves them as 'self.pricing_data' """
+
+
+
+
+        self.nonstocked_pf_data = self.pricing_data['Nonstocked Self Edge']
+
+
+        #create window
+        self.non_stocked_pf_selector = tk.Toplevel()
+        self.non_stocked_pf_selector.iconbitmap(r'icon\app.ico')
+
+
+
+        #add a frame
+        self.ns_pf_brand_frm = tk.Frame(self.non_stocked_pf_selector)
+        self.ns_pf_brand_frm.pack()
+    
+
+
+        # Brand and Color Dropdown menu options
+        brand_options = [brand for brand in self.nonstocked_pf_data.keys()]
+        self.color_options = []#this is filled in later
+        
+        #object for menu text
+        self.ns_pf_brand = tk.StringVar()
+        # initial menu text
+        self.ns_pf_brand.set(self.color_selection_default)
+        
+        # Create Dropdown menu
+        brand_dropdown = tk.OptionMenu( self.ns_pf_brand_frm , self.ns_pf_brand , *brand_options )
+        brand_dropdown.grid(row=0,column=0)
+
+
+
+
+        self.ns_pf_color_frm =  tk.Frame(self.non_stocked_pf_selector)
+        self.ns_pf_color_frm.pack()
+
+        self.ns_pf_color = tk.StringVar()
+
+        self.color_dropdown = tk.OptionMenu( self.ns_pf_color_frm , self.ns_pf_color ,self.color_selection_default, *self.color_options )
+        self.color_dropdown.grid(row=0,column=0)
+        self.ns_pf_color.set(self.color_selection_default)
+
+        self.ns_pf_selection_confirm_frm = tk.Frame(self.non_stocked_pf_selector)
+        self.ns_pf_selection_confirm_frm.pack()
+
+        self.ns_pf_selection_lbl = tk.Label(self.ns_pf_selection_confirm_frm, text='No selection made')
+        self.ns_pf_selection_lbl.pack()
+
+
+        self.ns_pf_button_frm = tk.Frame(self.non_stocked_pf_selector)
+        self.ns_pf_button_frm.pack()
+
+        self.ns_pf_submit_btn = tk.Button(self.ns_pf_button_frm, text='Submit', command=self.submit_ns_pf, state=tk.DISABLED)
+        self.ns_pf_submit_btn.pack()
+
+
+
+        self.ns_pf_brand.trace_add("write",lambda name,index,mode, brand = self.ns_pf_brand:self.load_pf_colors(brand))
+
+        self.ns_pf_color.trace_add("write",lambda name,index,mode: self.load_ns_pf_selection())
+
+        
+
+    def check_ns_pf_label(self,):
+        if self.color_selection_default not in self.ns_pf_selection_lbl.cget('text'):
+            self.ns_pf_submit_btn.config(state=tk.ACTIVE)
+        else:
+            self.ns_pf_submit_btn.config(state=tk.DISABLED)
+
+    def submit_ns_pf(self):
+        
+        brand,color = self.ns_pf_brand.get(),self.ns_pf_color.get()
+        
+        # #find pricing from brand and color
+        # for level, details in self.nonstocked_pf_data[brand].items():
+        #     if color in details['Color']:
+        #         break
+
+        # price = self.nonstocked_pf_data[brand][level]['Price'] #saved but not currently in code
+        ns_selection = [brand, color]
+        ns_selection_key = ": ".join(ns_selection[0:2])
+
+
+        if ns_selection_key not in self.ns_pf_lbls_dict:
+      
+            ns_selection_frm = tk.Frame(self.postform_non_stocked_frm)
+            ns_selection_frm.pack()
+            ns_pf_lbl = tk.Label(ns_selection_frm, text = ns_selection_key)
+            ns_pf_lbl.pack(side=tk.LEFT)
+
+
+            ns_pf_delete_btn = tk.Button(ns_selection_frm,text='X', command= lambda selection = ns_selection_key: self.delete_ns_pf_row(selection))
+
+            
+            ns_pf_delete_btn.pack(side=tk.RIGHT)
+            self.ns_pf_lbls_dict[ns_selection_key] = ns_selection_frm 
+        else:#hello working on using the dicitonary to add to stone or laminate fucnation cause it nwo has the pricing too, add it to the pricing_levels  at other hello
+            messagebox.showerror("Error Submitting Non-Stocked Selection", "Selection Already Made")
+
+
+
+
+    def delete_ns_pf_row(self,selection):
+
+        self.ns_pf_lbls_dict[selection].destroy()
+        self.ns_pf_lbls_dict.pop(selection)
+        print(self.ns_pf_lbls_dict)
+        pass
+
+    def load_pf_colors(self,brand):
+        #find brand in json and load names
+        brand = brand.get()
+        self.color_options= []
+        brand_data = self.nonstocked_pf_data[brand]
+        for level in brand_data:
+            for color in brand_data[level]['Color']:
+                self.color_options.append(color)
+        self.color_options = sorted(self.color_options)
+
+        self.color_dropdown['menu'].delete(0, 'end')
+        for option in self.color_options:
+            self.color_dropdown['menu'].add_command(label=option, command=tk._setit(self.ns_pf_color, option))
+
+        self.ns_pf_color.set(self.color_selection_default)
+        print(brand)
+
+    def load_ns_pf_selection(self):
+        self.ns_pf_selection_lbl.config(text=f'{self.ns_pf_brand.get()}: {self.ns_pf_color.get()}')
+
+        self.check_ns_pf_label()
+
+
+
+
+
+
     #might make this a decorator but haven't decided
     async def import_pricing_data(self):
         """This imports the pricing structures from jsons folder and saves them as 'self.pricing_data' """
@@ -444,18 +632,20 @@ class QuoteGenerator:
         self.pricing_data = {}
 
         #lined each one for ease of correcting later
-        selfEdgeDataHtml = r"jsons\lam_pricing_data.json"
-        stoneDataHtml = r"jsons\stone_pricing_data.json"
-        nsSelfEdgeDataHtml = r"jsons\non_stock_lam.json"
-        nsStoneDataHtmlr = r"jsons\non_stock_stone.json"
+        selfEdgeDataPath = r"jsons\lam_pricing_data.json"
+        stoneDataPath = r"jsons\stone_pricing_data.json"
+        nsSelfEdgeDataPath = r"jsons\non_stock_lam.json"
+        nsStoneDataPath = r"jsons\non_stock_stone.json"
+        pfDataBath = r"jsons\postform_pricing_data.json"
 
         #store htmls in a dict
-        self.data_jsons = {'Self Edge': selfEdgeDataHtml, 
-                           'Stone': stoneDataHtml, 
-                           'Nonstocked Self Edge': nsSelfEdgeDataHtml,
-                           'Nonstocked Stone': nsStoneDataHtmlr}
+        self.data_jsons = {'Self Edge': selfEdgeDataPath, 
+                           'Stone': stoneDataPath, 
+                           'Nonstocked Self Edge': nsSelfEdgeDataPath,
+                           'Nonstocked Stone': nsStoneDataPath,
+                           'Postform': pfDataBath}
         #pull data
-        pullDataTasks = [pullData(key,html) for key,html in self.data_jsons.items()]
+        pullDataTasks = [pullData(key,path) for key,path in self.data_jsons.items()]
         await asyncio.gather(*pullDataTasks)
         print(len(self.pricing_data))
         
@@ -950,6 +1140,25 @@ class QuoteGenerator:
             self.jobData = extractDataFromPdf(self.filepath)
             self.file_select_text["text"
             ] = f"{self.jobData['Job Name']} for {self.jobData['Customer Name']} is currently selected"
+
+        self.master.geometry("800x600")
+        self.pricingTabControl.pack(expand=1,fill= 'both')
+        print(self.jobData)
+        if len(self.jobData) > 6:
+            self.pricingState = 'postform'
+            self.pricingTabControl.tab(0,state = 'disabled')
+            self.pricingTabControl.tab(1,state = 'disabled')
+            self.pricingTabControl.tab(2,state = 'normal')
+            self.pricingTabControl.select(2)
+
+            print('sup')
+        else:
+            self.pricingState = 'standard'
+            self.pricingTabControl.tab(0,state = 'normal')
+            self.pricingTabControl.tab(1,state = 'normal')
+            self.pricingTabControl.tab(2,state = 'disabled')
+            self.pricingTabControl.select(0)
+
             
 
 
@@ -992,7 +1201,7 @@ class QuoteGenerator:
         self.stnd_multipliers_lbl = tk.Label(
             master=self.multiplier_frm,
             text="Standard Multipliers \n"
-            + "Wholesale: .525  |  Large K&B: .55  |  Small K&B: .575  |  Builders: .625  |  Local Contractors: .645  |  Retail: .7",
+            + "Wholesale: .55  |  Kitchen & Bath: .6  |  Builders: .625  |  Local Contractors: .675  |  Retail: .75",
         )
         self.stnd_multipliers_lbl.grid(row=1, column=0, columnspan=2)
 
@@ -1071,10 +1280,43 @@ class QuoteGenerator:
 
     def clear_button_cmd(self):
         """This clears all entries on click"""
-        for list in self.entries:
-            for entry in list:
+
+
+        result = messagebox.askyesno("Confirm Clear", "Do you want to clear all entries?")
+        if not result:
+            return
+
+
+        for selection in self.ns_lam_lbls_dict.keys():
+            self.delete_ns_lam_row(selection)
+        
+        for selection in self.ns_stone_lbls_dict.keys():
+            self.delete_ns_stone_row(selection)
+
+        for selection in self.ns_stone_lbls_dict.keys():
+            self.delete_ns_pf_row(selection)
+
+
+        for material in self.entries:
+            for entry in self.entries[material]:
+                
                 entry.delete(0, tk.END)
                 entry.insert(0, "0")
+
+
+        self.multiplier_ent.delete(0, tk.END)
+        self.multiplier_ent.insert(0, "0")
+        self.jobData = []
+        self.file_select_text["text"] = f"No File Selected"
+
+        # for i,tab in enumerate(self.pricingTabs):
+        #     self.pricingTabControl.tab(i,state = 'disabled')
+            
+        self.pricingTabControl.pack_forget()
+        # self.master.geometry("800x200")
+        
+
+
 
     def submit_button(self):
         """"""
@@ -1102,7 +1344,7 @@ class QuoteGenerator:
         self.confirmSelectionBtn.pack()
         
         # Add a trace to the StringVar to enable/disable the button based on selection
-        self.materialSelection.trace('w', self.update_confirm_button_state)
+        self.materialSelection.trace_add('write', self.update_confirm_button_state)
 
 
         self.material_selection_window.mainloop()

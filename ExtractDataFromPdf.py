@@ -15,9 +15,26 @@ def extractDataFromPdf(file_path: str) -> dict :
         final_total_area = float()
         final_wall_lnft = float()
         final_finished_lnft = float()
-        final_flat_finished_lnft = float()
+        final_flat_finish_lnft = float()
+        final_KD_lnft = float()
+        final_KDDeck_lnft = float()
+        final_VD_lnft = float()
+        final_VDDeck_lnft = float()
+        final_twelve_bar_lnft = float()
+        final_fifteen_bar_lnft = float()
+        final_eighteen_bar_lnft = float()
+        final_twenty_six_bar_lnft = float()
+        final_twenty_seven_bar_lnft = float()
+        final_thirty_two_bar_lnft = float()
+        final_thirty_six_bar_lnft = float()
+        final_forty_two_bar_lnft = float()
+        final_forty_five_bar_lnft = float()
 
-        
+
+
+
+
+        #remember to put a post-form check to avoid pricing issues later
         
         
         pdf_reader = PyPDF2.PdfReader(file)
@@ -39,36 +56,63 @@ def extractDataFromPdf(file_path: str) -> dict :
             lines.reverse() #lines is reversed to speed up large files because the key is last in the text files
 
 
+    def extract_and_accumulate(line, keyword):
+        pattern = r'{}:\s*(\d+(?:\.\d+)?)'.format(re.escape(keyword))
+        match = re.search(pattern, line)
+        if keyword in line and match:
+            value = float(match.group(1))
+            return value
+        else:
+            return 0
 
-            for line in lines:
-                if "Total Area" in line and re.search(r'\b\d+(?:\.\d+)?\b', line):
-                        total_area = re.search(r'\b\d+(?:\.\d+)?\b', line)
-                        total_area = float(total_area[0])
-                        final_total_area += total_area
-                        break #"Total Area" is the first key and since order is reversed break skips to next page
-                        
-                elif "Wall" in line and re.search(r'\b\d+(?:\.\d+)?\b', line):
-                        wall_lnft = re.search(r'\b\d+(?:\.\d+)?\b', line)
-                        wall_lnft = float(wall_lnft[0])
-                        final_wall_lnft += wall_lnft
-                elif "Finished" in line and re.search(r'\b\d+(?:\.\d+)?\b', line):
-                        finished_lnft = re.search(r'\b\d+(?:\.\d+)?\b', line)
-                        finished_lnft = float(finished_lnft[0])
-                        final_finished_lnft += finished_lnft
-                elif "Flat Finish" in line and re.search(r'\b\d+(?:\.\d+)?\b', line):
-                        flat_finished_lnft = re.search(r'\b\d+(?:\.\d+)?\b', line)
-                        flat_finished_lnft = float(flat_finished_lnft[0])
-                        final_flat_finished_lnft += flat_finished_lnft
+    for line in lines:
+        
+        final_total_area += extract_and_accumulate(line, 'Total Area')
+        final_wall_lnft += extract_and_accumulate(line, 'Wall')
+        final_finished_lnft += extract_and_accumulate(line, "Finished")
+        final_flat_finish_lnft += extract_and_accumulate(line, "Flat Finish")
+        final_KD_lnft += extract_and_accumulate(line, "Kitchen Depth")
+        final_KDDeck_lnft += extract_and_accumulate(line, "Kitchen Depth Deck")
+        final_VD_lnft += extract_and_accumulate(line, "Vanity Depth")
+        final_VDDeck_lnft += extract_and_accumulate(line, "Vanity Depth Deck")
+        final_twelve_bar_lnft += extract_and_accumulate(line, '12" Bar')
+        final_fifteen_bar_lnft += extract_and_accumulate(line, '15" Bar')
+        final_eighteen_bar_lnft += extract_and_accumulate(line, '18" Bar')
+        final_twenty_six_bar_lnft += extract_and_accumulate(line, '26" Bar')
+        final_twenty_seven_bar_lnft += extract_and_accumulate(line, '27" Bar')
+        final_thirty_two_bar_lnft += extract_and_accumulate(line, '32" Bar')
+        final_thirty_six_bar_lnft += extract_and_accumulate(line, '36" Bar')
+        final_forty_two_bar_lnft += extract_and_accumulate(line, '42" Bar')
+        final_forty_five_bar_lnft += extract_and_accumulate(line, '45" Bar')
 
 
-    data = {
-        "Customer Name": customer_name.replace('\n',''),
-        "Job Name": job_name.replace('\n',''),
-        "Total Area": final_total_area,
-        "Wall Lnft": final_wall_lnft,
-        "Finished Lnft": final_finished_lnft,
-        "Flat Finished Lnft": final_flat_finished_lnft
-    }
+    if final_wall_lnft or final_finished_lnft or final_flat_finish_lnft:
+        data = {
+            "Customer Name": customer_name.replace('\n',' '),
+            "Job Name": job_name.replace('\n',' '),
+            "Total Area": final_total_area,
+            "Wall Lnft": final_wall_lnft,
+            "Finished Lnft": final_finished_lnft,
+            "Flat Finished Lnft": final_flat_finish_lnft
+        }
+    else:
+        data = {
+            "Customer Name": customer_name.replace('\n',' '),
+            "Job Name": job_name.replace('\n',' '),
+            "Kitchen Depth": final_KD_lnft,
+            "Kitchen Depth Deck": final_KDDeck_lnft,
+            "Vanity Depth": final_VD_lnft,
+            "Vanity Depth Deck": final_VDDeck_lnft,
+            '12" Bar': final_twelve_bar_lnft,
+            '15" Bar': final_fifteen_bar_lnft,
+            '18" Bar': final_eighteen_bar_lnft,
+            '26" Bar': final_twenty_six_bar_lnft,
+            '27" Bar': final_twenty_seven_bar_lnft,
+            '32" Bar': final_thirty_two_bar_lnft,
+            '36" Bar': final_thirty_six_bar_lnft,
+            '42" Bar': final_forty_two_bar_lnft,
+            '45" Bar': final_forty_five_bar_lnft
+        }
 
     return data
 
@@ -77,7 +121,12 @@ if __name__ == "__main__":
     # Usage example
     single_page = 'Pricing_Testing_P1.pdf'
     multi_page = 'Pricing_Testing_Job.pdf'
-    extracted_data = extractDataFromPdf(single_page)
+    post_form_page = 'Testing_Post-form_Stuff_P1.pdf'
+    # extracted_data = extractDataFromPdf(single_page)
     extracted_data2 = extractDataFromPdf(multi_page)
-    print(extracted_data)
+    extracted_data3 = extractDataFromPdf(post_form_page)
+
+    # print(extracted_data)
     print(extracted_data2)
+    print(extracted_data3)
+
