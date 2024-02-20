@@ -650,6 +650,10 @@ class QuoteGenerator:
         print(len(self.pricing_data))
         
 
+
+
+        
+
     async def lam_quote(self,sqft,multiplier):
 
         # info for pricing structures on stones
@@ -703,6 +707,71 @@ class QuoteGenerator:
         await asyncio.gather(*lamPricingTasks)
 
         return lam_levels
+    
+
+
+
+
+        
+
+    async def pf_quote(self,sqft,multiplier):
+
+        # info for pricing structures on stones
+
+        pf_levels = self.pricing_data['Postform']["lam_levels"]
+
+        # pricing on add-ons
+        add_ons = self.pricing_data['Self Edge']["add_ons"]
+
+
+        
+
+        #lambda for getting final price of laminate by multiplying level price by sqft, adding in add-ons
+        #multiplying by 2 and then multiply by customer multiplier
+        get_final_lam_price = lambda material_sqft_cost: math.ceil(
+                (((material_sqft_cost * sqft) + sum(add_on_price.values())) * 2) * multiplier
+                )
+        
+
+        # takes the entries for the quantities of add-ons and multiplies it by the preset values to get costs of add-ons
+        add_on_price = {key: add_ons[key] * self.lamAddOnQuants[key] for key in add_ons}
+
+        #change dictionary of levels to also have a price?
+
+
+        async def getLamPrice(lamLevel):
+            sqftPrice = lam_levels[lamLevel]['Price'] #prettify the get final price
+
+            lam_levels[lamLevel]['Price'] = get_final_lam_price(sqftPrice)
+
+            if "Nonstocked" in lamLevel:
+                totalSheetsSqft = lam_levels[lamLevel]['SheetQty'] * 60
+                wasteMaterial = totalSheetsSqft - sqft
+                sheetCost = lam_levels[lamLevel]['Cost']
+                print(f'{sqft}sqft of material with {wasteMaterial}sqft of waste')
+                wasteMaterialCost = math.ceil(wasteMaterial * sheetCost * multiplier)
+                print(wasteMaterialCost)
+                lam_levels[lamLevel]['Price'] += wasteMaterialCost
+            #laminate minumum $250 check
+            #TODO: 10-4-23 rework how stone check for non-stocks like here in the laminate quote
+            if lam_levels[lamLevel]['Price'] < 250:
+                full_charge = self.pricing_data['Self Edge']['add_ons']['trip_charge']* multiplier
+                current_level_price = lam_levels[lamLevel]['Price']
+                increase_options = [250 - current_level_price,full_charge] #price is the lower of either the difference or half a trip charge
+                price_increase = min(increase_options)
+                print(price_increase, 'options where', increase_options)
+                lam_levels[lamLevel]['Price'] = math.ceil(current_level_price + price_increase)
+
+        lamPricingTasks = [getLamPrice(lamLevel) for lamLevel in lam_levels]
+
+        await asyncio.gather(*lamPricingTasks)
+
+        return lam_levels
+    
+
+
+
+
     async def stone_quote(self,sqft,multiplier):
     
         # pre-set values
@@ -1143,7 +1212,7 @@ class QuoteGenerator:
 
         self.master.geometry("800x600")
         self.pricingTabControl.pack(expand=1,fill= 'both')
-        print(self.jobData)
+        print(self.job)
         if len(self.jobData) > 6:
             self.pricingState = 'postform'
             self.pricingTabControl.tab(0,state = 'disabled')
